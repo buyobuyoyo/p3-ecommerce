@@ -54,3 +54,4 @@ def actualizar_profile(
 def eliminar_profile(id_profile: str, _user=Depends(get_current_user)):  # 🔒
     data = supabase.table("Profile").delete().eq("id_profile", id_profile).execute()
     return data
+
