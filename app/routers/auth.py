@@ -104,7 +104,8 @@ def get_me(current_user=Depends(get_current_user)):
 @router.post("/logout")
 def logout(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
-        supabase.auth.admin.sign_out(credentials.credentials)
+        user = supabase.auth.get_user(credentials.credentials)
+        supabase.auth.admin.sign_out(user.user.id)
         return {"mensaje": "Sesión cerrada correctamente"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al cerrar sesión: {str(e)}")
