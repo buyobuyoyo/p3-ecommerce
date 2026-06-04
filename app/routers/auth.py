@@ -90,20 +90,7 @@ def auth_callback():
 
 
 @router.get("/me")
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    try:
-        user = supabase.auth.get_user(credentials.credentials)
-        if not user or not user.user:
-            raise HTTPException(status_code=401, detail="Token inválido o expirado")
-        return user.user
-    except HTTPException:
-        raise  # re-lanza los 401 normales
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=f"Error real: {str(e)}")  # <-- esto
-    """
-    Devuelve los datos del usuario autenticado.
-    Útil para que el frontend sepa quién está logueado.
-    """
+def get_me(current_user=Depends(get_current_user)):
     return {
         "id": current_user.id,
         "email": current_user.email,
