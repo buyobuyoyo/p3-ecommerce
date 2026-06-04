@@ -40,13 +40,17 @@ def actualizar_profile(
     nombre: str = None,
     apellido: str = None,
     telefono: str = None,
-    _user=Depends(get_current_user)          # 🔒 OAuth
+    _user=Depends(get_current_user)
 ):
-    data = supabase.table("Profile").update({
-        "nombre": nombre,
-        "apellido": apellido,
-        "telefono": telefono
-    }).eq("id_profile", id_profile).execute()
+    fields = {}
+    if nombre is not None: fields["nombre"] = nombre
+    if apellido is not None: fields["apellido"] = apellido
+    if telefono is not None: fields["telefono"] = telefono
+
+    if not fields:
+        return {"error": "No se envió ningún campo para actualizar"}
+
+    data = supabase.table("Profile").update(fields).eq("id_profile", id_profile).execute()
     return data
 
 

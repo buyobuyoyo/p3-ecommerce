@@ -100,14 +100,11 @@ def get_me(current_user=Depends(get_current_user)):
     }
 
 
+
 @router.post("/logout")
 def logout(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    """
-    Invalida la sesión del usuario en Supabase.
-    El frontend también debe limpiar el token de su storage local.
-    """
     try:
-        supabase.auth.sign_out()
+        supabase.auth.admin.sign_out(credentials.credentials)
         return {"mensaje": "Sesión cerrada correctamente"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al cerrar sesión: {str(e)}")

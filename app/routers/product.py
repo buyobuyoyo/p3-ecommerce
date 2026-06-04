@@ -50,14 +50,18 @@ def actualizar_product(
     precio: float = None,
     disponible: bool = None,
     lanzamiento: str = None,
-    _user=Depends(get_current_user)          # 🔒 OAuth
+    _user=Depends(get_current_user)
 ):
-    data = supabase.table("Product").update({
-        "titulo": titulo,
-        "precio": precio,
-        "disponible": disponible,
-        "lanzamiento": lanzamiento
-    }).eq("id_product", id_product).execute()
+    fields = {}
+    if titulo is not None: fields["titulo"] = titulo
+    if precio is not None: fields["precio"] = precio
+    if disponible is not None: fields["disponible"] = disponible
+    if lanzamiento is not None: fields["lanzamiento"] = lanzamiento
+
+    if not fields:
+        return {"error": "No se envió ningún campo para actualizar"}
+
+    data = supabase.table("Product").update(fields).eq("id_product", id_product).execute()
     return data
 
 

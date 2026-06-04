@@ -41,8 +41,13 @@ def obtener_pedido(id_pedido: str, _user=Depends(get_current_user)):    # 🔒 O
 def actualizar_pedido(
     id_pedido: str,
     estado: str,
-    _user=Depends(get_current_user)          # 🔒 OAuth
+    _user=Depends(get_current_user)
 ):
+    # Pedido solo actualiza estado, así que aquí no hay problema de None,
+    # pero la guardia se agrega igual
+    if not estado:
+        return {"error": "No se envió ningún campo para actualizar"}
+
     data = supabase.table("Pedido").update({
         "estado": estado
     }).eq("id_pedido", id_pedido).execute()
