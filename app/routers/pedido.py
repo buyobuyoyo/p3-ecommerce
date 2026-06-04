@@ -12,7 +12,7 @@ def crear_pedido(
     fecha_renta: str,
     fecha_devolucion: str,
     total: float,
-    _user=Depends(get_current_user)          # 🔒
+    _user=Depends(get_current_user)          # 🔒 OAuth
 ):
     data = supabase.table("Pedido").insert({
         "id_profile": id_profile,
@@ -26,13 +26,13 @@ def crear_pedido(
 
 
 @router.get("/")
-def obtener_pedidos(_user=Depends(get_current_user)):    # 🔒
+def obtener_pedidos(_user=Depends(get_current_user)):    # 🔒 OAuth
     data = supabase.table("Pedido").select("*").execute()
     return data
 
 
 @router.get("/{id_pedido}")
-def obtener_pedido(id_pedido: str, _user=Depends(get_current_user)):    # 🔒
+def obtener_pedido(id_pedido: str, _user=Depends(get_current_user)):    # 🔒 OAuth
     data = supabase.table("Pedido").select("*").eq("id_pedido", id_pedido).execute()
     return data
 
@@ -41,7 +41,7 @@ def obtener_pedido(id_pedido: str, _user=Depends(get_current_user)):    # 🔒
 def actualizar_pedido(
     id_pedido: str,
     estado: str,
-    _user=Depends(get_current_user)          # 🔒
+    _user=Depends(get_current_user)          # 🔒 OAuth
 ):
     data = supabase.table("Pedido").update({
         "estado": estado
@@ -50,6 +50,6 @@ def actualizar_pedido(
 
 
 @router.delete("/{id_pedido}")
-def eliminar_pedido(id_pedido: str, _user=Depends(get_current_user)):   # 🔒
+def eliminar_pedido(id_pedido: str, _user=Depends(get_current_user)):   # 🔒 OAuth
     data = supabase.table("Pedido").delete().eq("id_pedido", id_pedido).execute()
     return data

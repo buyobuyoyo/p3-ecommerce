@@ -11,7 +11,7 @@ def crear_profile(
     apellido: str,
     email: str,
     telefono: str = None,
-    _user=Depends(get_current_user)          # 🔒 requiere token válido
+    _user=Depends(get_current_user)          # 🔒 OAuth
 ):
     data = supabase.table("Profile").insert({
         "nombre": nombre,
@@ -23,13 +23,13 @@ def crear_profile(
 
 
 @router.get("/")
-def obtener_profiles(_user=Depends(get_current_user)):   # 🔒
+def obtener_profiles(_user=Depends(get_current_user)):   # 🔒 OAuth
     data = supabase.table("Profile").select("*").execute()
     return data
 
 
 @router.get("/{id_profile}")
-def obtener_profile(id_profile: str, _user=Depends(get_current_user)):  # 🔒
+def obtener_profile(id_profile: str, _user=Depends(get_current_user)):  # 🔒 OAuth
     data = supabase.table("Profile").select("*").eq("id_profile", id_profile).execute()
     return data
 
@@ -40,7 +40,7 @@ def actualizar_profile(
     nombre: str = None,
     apellido: str = None,
     telefono: str = None,
-    _user=Depends(get_current_user)          # 🔒
+    _user=Depends(get_current_user)          # 🔒 OAuth
 ):
     data = supabase.table("Profile").update({
         "nombre": nombre,
@@ -51,7 +51,7 @@ def actualizar_profile(
 
 
 @router.delete("/{id_profile}")
-def eliminar_profile(id_profile: str, _user=Depends(get_current_user)):  # 🔒
+def eliminar_profile(id_profile: str, _user=Depends(get_current_user)):  # 🔒 OAuth
     data = supabase.table("Profile").delete().eq("id_profile", id_profile).execute()
     return data
 

@@ -50,7 +50,7 @@ def actualizar_product(
     precio: float = None,
     disponible: bool = None,
     lanzamiento: str = None,
-    _user=Depends(get_current_user)          # 🔒
+    _user=Depends(get_current_user)          # 🔒 OAuth
 ):
     data = supabase.table("Product").update({
         "titulo": titulo,
@@ -62,6 +62,6 @@ def actualizar_product(
 
 
 @router.delete("/{id_product}")
-def eliminar_product(id_product: str, _user=Depends(get_current_user)):  # 🔒
+def eliminar_product(id_product: str, _user=Depends(get_current_user)):  # 🔒 OAuth
     data = supabase.table("Product").delete().eq("id_product", id_product).execute()
     return data

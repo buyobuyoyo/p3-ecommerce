@@ -14,29 +14,30 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.database import supabase
 # ── Comunicación con Supabase, que es donde tenemos la base de datos y la autenticación
 
+from app.dependencies import get_current_user
 
 
 router = APIRouter()
-# Instanciar el objeto
+# # Instanciar el objeto
 security = HTTPBearer()
-# Instanciar el objeto
+# # Instanciar el objeto
 
 
-# ── Dependency reutilizable ──────────────────────────────────────────────────
+# # ── Dependency reutilizable ──────────────────────────────────────────────────
 
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+# def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     
-    # Valida el JWT que manda el frontend en el header:
-    # Authorization: Bearer <token>
-    # Devuelve el objeto user de Supabase, o lanza 401.
+#     # Valida el JWT que manda el frontend en el header:
+#     # Authorization: Bearer <token>
+#     # Devuelve el objeto user de Supabase, o lanza 401.
     
-    try:
-        user = supabase.auth.get_user(credentials.credentials)
-        if not user or not user.user:
-            raise HTTPException(status_code=401, detail="Token inválido o expirado")
-        return user.user
-    except Exception:
-        raise HTTPException(status_code=401, detail="No autorizado")
+#     try:
+#         user = supabase.auth.get_user(credentials.credentials)
+#         if not user or not user.user:
+#             raise HTTPException(status_code=401, detail="Token inválido o expirado")
+#         return user.user
+#     except Exception:
+#         raise HTTPException(status_code=401, detail="No autorizado")
 
 
 # ── Endpoints ────────────────────────────────────────────────────────────────
@@ -65,6 +66,7 @@ def auth_callback():
     return {"mensaje": "Autenticación exitosa. Copia el access_token del fragmento #hash de la URL."}
 
 # Código viejo que parece no funcionar porque aún no hay front que transforme el token de GitHub en un JWT de Supa.
+
 # def auth_callback(code: str = None, error: str = None):
     # code: str = None: Es una variable que espera recibir un "código temporal" de GitHub. Es como un vale que luego se canjea por la llave (token) real.
     # error: str = None: Si algo salió mal en GitHub (por ejemplo, el usuario le dio a "Cancelar"), GitHub enviará el motivo del error aquí.
