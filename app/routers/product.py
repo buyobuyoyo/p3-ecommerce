@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from app.database import supabase
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, require_role
 
 router = APIRouter()
 
@@ -14,7 +14,7 @@ def crear_product(
     imgurl: str = None,
     duracion: int = None,
     lanzamiento: str = None,
-    _user=Depends(get_current_user)          # 🔒
+    _user=Depends(require_role("admin"))          #solo admin
 ):
     data = supabase.table("Product").insert({
         "titulo": titulo,
@@ -29,14 +29,12 @@ def crear_product(
     return data
 
 
-# GET / es público — el catálogo de películas no requiere login
 @router.get("/")
 def obtener_products():
     data = supabase.table("Product").select("*").execute()
     return data
 
 
-# GET por ID también público
 @router.get("/{id_product}")
 def obtener_product(id_product: str):
     data = supabase.table("Product").select("*").eq("id_product", id_product).execute()
@@ -50,7 +48,7 @@ def actualizar_product(
     precio: float = None,
     disponible: bool = None,
     lanzamiento: str = None,
-    _user=Depends(get_current_user)
+    _user=Depends(require_role("admin"))          #solo admin
 ):
     fields = {}
     if titulo is not None: fields["titulo"] = titulo
@@ -66,6 +64,6 @@ def actualizar_product(
 
 
 @router.delete("/{id_product}")
-def eliminar_product(id_product: str, _user=Depends(get_current_user)):  # 🔒 OAuth
+def eliminar_product(id_product: str, _user=Depends(require_role("admin"))):  #solo admin
     data = supabase.table("Product").delete().eq("id_product", id_product).execute()
     return data

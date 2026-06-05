@@ -101,6 +101,37 @@ def get_me(current_user=Depends(get_current_user)):
 
 
 
+
+@router.post("/register")
+def register(current_user=Depends(get_current_user)):
+    """
+    Crea el Profile del usuario autenticado si aún no existe.
+    Se llama una vez después del primer login con GitHub.
+    """
+    existing = (
+        supabase.table("Profile")
+        .select("id_profile")
+        .eq("user_id", current_user.id)
+        .execute()
+    )
+    if existing.data:
+        return {"mensaje": "El perfil ya existe"}
+
+    email = current_user.email or ""
+    metadata = current_user.user_metadata or {}
+
+    data = supabase.table("Profile").insert({
+        "user_id": current_user.id,
+        "nombre": metadata.get("user_name", email),
+        "apellido": "",
+        "email": email,
+        "rol": "cliente"          # rol por defecto
+    }).execute()
+
+    return {"mensaje": "Perfil creado correctamente", "data": data.data}
+
+
+
 @router.post("/logout")
 def logout(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
@@ -109,3 +140,8 @@ def logout(credentials: HTTPAuthorizationCredentials = Depends(security)):
         return {"mensaje": "Sesión cerrada correctamente"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al cerrar sesión: {str(e)}")
+    
+
+
+
+    
