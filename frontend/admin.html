@@ -4,135 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — CineRenta</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing:border-box;margin:0;padding:0; }
-  :root { --bg:#0a0a0f;--surface:#13131a;--border:#222230;--accent:#e8c840;--accent2:#ff4d6d;--text:#f0f0f0;--muted:#666680; }
-  body { background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh; }
-
-  nav {
-    position:sticky;top:0;z-index:100;background:rgba(10,10,15,0.95);
-    backdrop-filter:blur(10px);border-bottom:1px solid var(--border);
-    display:flex;align-items:center;padding:0 2rem;height:60px;gap:2rem;
-  }
-  .nav-logo { font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--accent);text-decoration:none; }
-  .admin-badge {
-    background:rgba(232,200,64,0.1);border:1px solid rgba(232,200,64,0.3);
-    color:var(--accent);font-size:0.65rem;letter-spacing:0.15em;
-    text-transform:uppercase;padding:0.2rem 0.6rem;border-radius:3px;
-  }
-  .nav-right { margin-left:auto;display:flex;align-items:center;gap:1rem; }
-  .btn-logout {
-    background:transparent;border:1px solid var(--border);color:var(--muted);
-    padding:0.35rem 0.75rem;font-size:0.75rem;cursor:pointer;border-radius:3px;
-    font-family:inherit;transition:all 0.2s;
-  }
-  .btn-logout:hover { border-color:var(--accent2);color:var(--accent2); }
-
-  .page { max-width:1100px;margin:2rem auto;padding:0 2rem; }
-
-  .tabs { display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:2rem; }
-  .tab {
-    padding:0.75rem 1.5rem;font-size:0.82rem;letter-spacing:0.08em;
-    text-transform:uppercase;cursor:pointer;color:var(--muted);
-    border-bottom:2px solid transparent;transition:all 0.2s;background:none;border-top:none;
-    border-left:none;border-right:none;font-family:inherit;
-  }
-  .tab:hover { color:var(--text); }
-  .tab.active { color:var(--accent);border-bottom-color:var(--accent); }
-
-  .tab-content { display:none; }
-  .tab-content.active { display:block; }
-
-  /* Products tab */
-  .products-header { display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem; }
-  .products-header h2 { font-family:'Bebas Neue',sans-serif;font-size:2rem; }
-  .btn-primary {
-    background:var(--accent);color:#0a0a0f;border:none;padding:0.6rem 1.2rem;
-    cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:0.08em;
-    border-radius:4px;transition:opacity 0.2s;
-  }
-  .btn-primary:hover { opacity:0.85; }
-
-  /* Modal */
-  .modal-overlay {
-    display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);
-    z-index:200;align-items:center;justify-content:center;
-  }
-  .modal-overlay.open { display:flex; }
-  .modal {
-    background:var(--surface);border:1px solid var(--border);border-radius:8px;
-    padding:2rem;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;
-    position:relative;
-  }
-  .modal::before {
-    content:'';position:absolute;top:0;left:0;right:0;height:3px;
-    background:linear-gradient(to right,var(--accent),var(--accent2));border-radius:8px 8px 0 0;
-  }
-  .modal h3 { font-family:'Bebas Neue',sans-serif;font-size:1.5rem;margin-bottom:1.5rem; }
-  .form-group { margin-bottom:1rem; }
-  .form-group label { display:block;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.3rem; }
-  .form-group input, .form-group select {
-    width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);
-    padding:0.6rem 0.85rem;border-radius:4px;font-family:inherit;font-size:0.88rem;outline:none;
-    transition:border-color 0.2s;
-  }
-  .form-group input:focus, .form-group select:focus { border-color:var(--accent); }
-  .form-group select option { background:var(--surface); }
-  .modal-actions { display:flex;gap:0.75rem;margin-top:1.5rem; }
-  .btn-cancel {
-    flex:1;background:transparent;border:1px solid var(--border);color:var(--muted);
-    padding:0.7rem;cursor:pointer;border-radius:4px;font-family:inherit;transition:all 0.2s;
-  }
-  .btn-cancel:hover { border-color:var(--muted); color:var(--text); }
-  #modal-msg { font-size:0.8rem;color:var(--accent2);margin-top:0.75rem;min-height:1em; }
-  #modal-msg.ok { color:#4dff91; }
-
-  /* Products grid */
-  .products-grid {
-    display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;
-  }
-  .admin-card {
-    background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;
-  }
-  .admin-card-img {
-    width:100%;height:140px;object-fit:cover;background:#1a1a28;
-    display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--muted);
-  }
-  .admin-card-img img { width:100%;height:100%;object-fit:cover; }
-  .admin-card-body { padding:1rem; }
-  .admin-card-title { font-family:'Bebas Neue',sans-serif;font-size:1.1rem;margin-bottom:0.3rem; }
-  .admin-card-meta { font-size:0.78rem;color:var(--muted);margin-bottom:0.75rem; }
-  .admin-card-actions { display:flex;gap:0.5rem; }
-  .btn-edit, .btn-delete {
-    flex:1;padding:0.4rem;font-size:0.75rem;cursor:pointer;border-radius:3px;
-    font-family:inherit;transition:all 0.2s;
-  }
-  .btn-edit { background:transparent;border:1px solid var(--border);color:var(--muted); }
-  .btn-edit:hover { border-color:var(--accent);color:var(--accent); }
-  .btn-delete { background:transparent;border:1px solid var(--border);color:var(--muted); }
-  .btn-delete:hover { border-color:var(--accent2);color:var(--accent2); }
-
-  /* Orders table */
-  .table-wrap { background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden; }
-  table { width:100%;border-collapse:collapse; }
-  thead tr { border-bottom:2px solid var(--border); }
-  th { padding:0.8rem 1rem;text-align:left;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted); }
-  td { padding:0.85rem 1rem;font-size:0.85rem;border-bottom:1px solid var(--border); }
-  tr:last-child td { border-bottom:none; }
-  tr:hover td { background:rgba(255,255,255,0.02); }
-  .badge { display:inline-block;padding:0.2rem 0.6rem;border-radius:20px;font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;font-weight:600; }
-  .badge-activo { background:rgba(77,255,145,0.1);color:#4dff91;border:1px solid rgba(77,255,145,0.2); }
-  .badge-vencido { background:rgba(255,77,109,0.1);color:var(--accent2);border:1px solid rgba(255,77,109,0.2); }
-  .badge-devuelto { background:rgba(102,102,128,0.1);color:var(--muted);border:1px solid var(--border); }
-  .price { color:var(--accent); }
-  select.estado-select {
-    background:var(--bg);border:1px solid var(--border);color:var(--text);
-    padding:0.3rem 0.5rem;border-radius:3px;font-family:inherit;font-size:0.8rem;cursor:pointer;
-  }
-
-  .loading { text-align:center;padding:3rem;color:var(--muted); }
-</style>
+<link rel="stylesheet" href="custom.css">
 </head>
 <body>
 <nav>
@@ -149,7 +21,7 @@
     <button class="tab" data-tab="orders">Pedidos</button>
   </div>
 
-  <!-- PRODUCTS TAB -->
+  <!-- TAB PELÍCULAS -->
   <div class="tab-content active" id="tab-products">
     <div class="products-header">
       <h2>Catálogo</h2>
@@ -160,9 +32,9 @@
     </div>
   </div>
 
-  <!-- ORDERS TAB -->
+  <!-- TAB PEDIDOS -->
   <div class="tab-content" id="tab-orders">
-    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:2rem;margin-bottom:1.5rem">Pedidos</h2>
+    <h2>Pedidos</h2>
     <div class="table-wrap">
       <table>
         <thead>
@@ -174,7 +46,7 @@
   </div>
 </div>
 
-<!-- MODAL -->
+<!-- MODAL PARA NUEVO/EDITAR -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <h3 id="modal-title">Nueva Película</h3>
@@ -188,19 +60,18 @@
     <div id="modal-msg"></div>
     <div class="modal-actions">
       <button class="btn-cancel" id="btn-cancel">Cancelar</button>
-      <button class="btn-primary" id="btn-save" style="flex:2">Guardar</button>
+      <button class="btn-primary" id="btn-save">Guardar</button>
     </div>
   </div>
 </div>
 
 <script type="module">
-import { authAdapter, productAdapter, pedidoAdapter, requireAuth, getToken } from './infraestructure/app.js';
+import { authAdapter, productAdapter, pedidoAdapter, requireAuth } from './infraestructure/app.js';
 const token = requireAuth();
 if (!token) throw new Error('no auth');
 
 document.getElementById('btn-logout').addEventListener('click', () => authAdapter.logout(token));
 
-// TABS
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -211,7 +82,6 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
-// ── PRODUCTS ──
 let editingId = null;
 
 async function loadProducts() {
@@ -225,7 +95,7 @@ async function loadProducts() {
           ${p.imgurl ? `<img src="${p.imgurl}" alt="${p.titulo}" onerror="this.parentElement.textContent='🎬'">` : '🎬'}
         </div>
         <div class="admin-card-body">
-          <div class="admin-card-title">${p.titulo}</div>
+          <h3 class="admin-card-title">${p.titulo}</h3>
           <div class="admin-card-meta">${p.genero || ''} · $${Number(p.precio).toFixed(2)} · ${p.disponible ? 'Disponible' : 'No disponible'}</div>
           <div class="admin-card-actions">
             <button class="btn-edit" data-id="${p.id}" data-titulo="${p.titulo}" data-desc="${p.descripcion || ''}"
@@ -309,17 +179,15 @@ document.getElementById('btn-save').addEventListener('click', async () => {
   }
 });
 
-// ── ORDERS ──
 async function loadOrders() {
   const tbody = document.getElementById('orders-tbody');
   try {
     const pedidos = await pedidoAdapter.todos(token);
     if (!pedidos.length) { tbody.innerHTML = '<tr><td colspan="5" class="loading">Sin pedidos</td></tr>'; return; }
     tbody.innerHTML = pedidos.map(p => {
-      const badgeClass = p.estado === 'activo' ? 'badge-activo' : p.estado === 'vencido' ? 'badge-vencido' : 'badge-devuelto';
       return `<tr>
-        <td style="font-family:monospace;font-size:0.75rem;color:var(--muted)">${p.id?.slice(0,8)}...</td>
-        <td style="font-family:monospace;font-size:0.75rem;color:var(--muted)">${p.id_product?.slice(0,8)}...</td>
+        <td style="font-family:monospace;">${p.id?.slice(0,8)}...</td>
+        <td style="font-family:monospace;">${p.id_product?.slice(0,8)}...</td>
         <td>${p.fecha_renta || '—'}</td>
         <td class="price">$${Number(p.total).toFixed(2)}</td>
         <td>

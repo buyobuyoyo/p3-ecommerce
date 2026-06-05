@@ -1,0 +1,423 @@
+/* ========================================================================
+  frontend/custom.css
+  Archivo unificado de diseño para CineRenta.
+  Usa este archivo para dar estilo y color a todo tu proyecto.
+  ¡Las clases estructurales base están aquí para que no se desordene!
+========================================================================
+*/
+
+@font-face {
+  font-family: 'cinni'; 
+  src:
+  url('./fonts/cinni.ttf') format('truetype'); 
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+input, select, button {
+  font-family: inherit; /* Hereda la tipografía que le pongas al body */
+  color: inherit;       /* Hereda el color blanco */
+}
+
+
+/* --- REGLAS DE ALINEACIÓN GENERAL --- */
+
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'cinni', sans-serif; 
+  background-color: #000000; 
+  color: #ffffff;            
+  min-height: 100vh;      
+  display: flex;
+  flex-direction: column;  
+   background-image: url('./assets/background.gif'); 
+   padding-bottom: 100px;
+
+   
+      
+}
+
+
+.window{
+  margin-top:300px;
+  position:relative;
+}
+
+.panel-form {
+  position: relative;
+  z-index: 1;              
+  width: 500px;
+  padding: 30px;
+  padding-left: 200px;
+}
+
+.imgylogin {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;    
+  justify-content: center;
+  max-width: 900px;
+  
+  margin: 0 auto;
+  position: relative;       
+}
+
+
+.titulotexto{
+  text-align: center;
+  padding:20px
+}
+
+.tituloimagen {
+  position: absolute;
+  z-index: 2;               
+  margin-right: 200px;      
+  margin-bottom: 90px;    /*que tan arriba la quiero*/
+
+  pointer-events: none;
+
+}
+
+.tituloimagen img {
+  width: 500px;
+  height: auto;
+  display: block;
+}
+
+
+/* --- FORM CONTENIDO --- */
+
+
+.form-tag {
+  font-size: 11px;
+  color: #666;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.form-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #000080;
+  margin-bottom: 2px;
+}
+
+.form-subtitle {
+  font-size: 12px;
+  color: #444;
+  margin-bottom: 14px;
+}
+
+/* Diferencia visual entre los dos botones */
+.btn-github {
+  background: #1a1a2e;
+  color: #fff;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.btn-token {
+  background: #000080;
+  color: #fff;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #666;
+  margin: 4px 0 10px;
+}
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #888;
+  box-shadow: 0 1px 0 #fff;
+}
+
+.step-hint {
+  margin-top: 14px;
+  padding: 8px 10px;
+  font-size: 11px;
+  line-height: 1.7;
+  background: #ffffcc;
+  border: 1px solid #888;
+  color: #333;
+}
+.step-hint strong { color: #000080; }
+
+/* Mensajes de resultado */
+
+
+/* --- BARRA DE NAVEGACIÓN --- */
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+}
+.nav-links, .nav-user {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+
+
+/* --- CATALOGO / INDEX.HTML (Rejilla de Películas) --- */
+.hero {
+  padding: 20px;
+}
+.filters {
+  display: flex;
+  gap: 10px;
+  padding: 10px 20px;
+  flex-wrap: wrap;
+}
+.catalog {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.card-img {
+  width: 100%;
+  aspect-ratio: 2/3;
+  overflow: hidden;
+}
+.card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.card-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 2px 8px;
+}
+.card-body {
+  padding: 10px;
+}
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+/* Botones flotantes (Carrito y Chat) */
+.cart-fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.cart-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+}
+.chat-fab {
+  position: fixed;
+  bottom: 20px;
+  right: 80px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* --- CHECKOUT.HTML (Carrito y Formulario) --- */
+.page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+@media (min-width: 768px) {
+  .layout {
+    grid-template-columns: 1.5fr 1fr;
+  }
+}
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+}
+.checkout-form {
+  padding: 20px;
+}
+.form-group {
+  margin-bottom: 15px;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 15px 0;
+}
+
+/* --- CHAT.HTML (Mensajería) --- */
+.chat-container {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+}
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+}
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+}
+.msg {
+  max-width: 70%;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+.msg-cliente {
+  align-self: flex-end;
+}
+.msg-asistente {
+  align-self: flex-start;
+}
+.msg-meta {
+  font-size: 0.7rem;
+  margin-top: 3px;
+}
+.input-row {
+  display: flex;
+  gap: 10px;
+  padding-top: 10px;
+}
+.chat-input {
+  flex: 1;
+  padding: 10px;
+}
+
+/* --- HISTORIAL.HTML Y ADMIN.HTML (Tablas y Listados) --- */
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 20px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  padding: 10px;
+  text-align: left;
+}
+.badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+}
+
+/* Tabs en Admin */
+.tabs {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 20px;
+}
+.tab {
+  padding: 10px 20px;
+  cursor: pointer;
+}
+.tab-content {
+  display: none;
+}
+.tab-content.active {
+  display: block;
+}
+
+/* Modales en Admin */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open {
+  display: flex;
+}
+.modal {
+  padding: 20px;
+  width: 90%;
+  max-width: 500px;
+}
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}

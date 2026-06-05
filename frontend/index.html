@@ -4,191 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Catálogo — CineRenta</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0a0a0f;
-    --surface: #13131a;
-    --border: #222230;
-    --accent: #e8c840;
-    --accent2: #ff4d6d;
-    --text: #f0f0f0;
-    --muted: #666680;
-  }
-  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
-
-  /* NAV */
-  nav {
-    position: sticky; top: 0; z-index: 100;
-    background: rgba(10,10,15,0.95);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center;
-    padding: 0 2rem; height: 60px; gap: 2rem;
-  }
-  .nav-logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.6rem; letter-spacing: 0.05em;
-    color: var(--accent); text-decoration: none;
-  }
-  .nav-links { display: flex; gap: 1.5rem; margin-left: auto; }
-  .nav-links a {
-    color: var(--muted); text-decoration: none;
-    font-size: 0.85rem; letter-spacing: 0.05em;
-    transition: color 0.2s;
-  }
-  .nav-links a:hover, .nav-links a.active { color: var(--text); }
-  .nav-user {
-    display: flex; align-items: center; gap: 0.75rem;
-    font-size: 0.8rem; color: var(--muted);
-  }
-  .nav-user span { color: var(--text); }
-  .btn-logout {
-    background: transparent; border: 1px solid var(--border);
-    color: var(--muted); padding: 0.35rem 0.75rem;
-    font-size: 0.75rem; cursor: pointer; border-radius: 3px;
-    font-family: inherit; transition: border-color 0.2s, color 0.2s;
-  }
-  .btn-logout:hover { border-color: var(--accent2); color: var(--accent2); }
-
-  /* HERO */
-  .hero {
-    padding: 4rem 2rem 2rem;
-    max-width: 1200px; margin: 0 auto;
-    display: flex; align-items: flex-end; justify-content: space-between;
-    gap: 2rem; flex-wrap: wrap;
-  }
-  .hero h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(3rem, 6vw, 5rem);
-    line-height: 1; letter-spacing: 0.03em;
-  }
-  .hero h1 em { color: var(--accent); font-style: normal; }
-
-  /* FILTERS */
-  .filters {
-    max-width: 1200px; margin: 0 auto;
-    padding: 0 2rem 1.5rem;
-    display: flex; gap: 0.5rem; flex-wrap: wrap;
-  }
-  .filter-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 0.4rem 1rem;
-    font-size: 0.78rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    cursor: pointer; border-radius: 20px;
-    font-family: inherit;
-    transition: all 0.2s;
-  }
-  .filter-btn:hover, .filter-btn.active {
-    border-color: var(--accent); color: var(--accent); background: rgba(232,200,64,0.05);
-  }
-
-  /* GRID */
-  .catalog {
-    max-width: 1200px; margin: 0 auto;
-    padding: 0 2rem 4rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.2s, border-color 0.2s;
-    position: relative;
-  }
-  .card:hover { transform: translateY(-4px); border-color: #333348; }
-
-  .card-img {
-    width: 100%; aspect-ratio: 2/3;
-    object-fit: cover;
-    background: #1a1a28;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--muted); font-size: 2rem;
-  }
-  .card-img img { width: 100%; height: 100%; object-fit: cover; }
-
-  .card-badge {
-    position: absolute; top: 0.5rem; right: 0.5rem;
-    background: var(--accent); color: #0a0a0f;
-    font-size: 0.65rem; font-weight: 700;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    padding: 0.2rem 0.5rem; border-radius: 3px;
-  }
-  .card-badge.unavailable { background: var(--muted); }
-
-  .card-body { padding: 1rem; }
-  .card-genre {
-    font-size: 0.65rem; letter-spacing: 0.15em;
-    text-transform: uppercase; color: var(--muted);
-    margin-bottom: 0.3rem;
-  }
-  .card-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.2rem; letter-spacing: 0.03em;
-    margin-bottom: 0.5rem; line-height: 1.1;
-  }
-  .card-footer {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-top: 0.75rem;
-  }
-  .card-price {
-    font-size: 1rem; font-weight: 500; color: var(--accent);
-  }
-  .btn-renta {
-    background: var(--accent); color: #0a0a0f;
-    border: none; padding: 0.4rem 0.8rem;
-    font-size: 0.75rem; font-weight: 700;
-    letter-spacing: 0.05em; cursor: pointer;
-    border-radius: 3px; font-family: inherit;
-    transition: opacity 0.2s;
-  }
-  .btn-renta:hover { opacity: 0.85; }
-  .btn-renta:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .empty { grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--muted); }
-
-  /* CART BUTTON */
-  .cart-fab {
-    position: fixed; bottom: 2rem; right: 2rem;
-    background: var(--accent); color: #0a0a0f;
-    border: none; width: 56px; height: 56px;
-    border-radius: 50%; cursor: pointer; font-size: 1.3rem;
-    box-shadow: 0 4px 20px rgba(232,200,64,0.3);
-    transition: transform 0.2s;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .cart-fab:hover { transform: scale(1.1); }
-  .cart-count {
-    position: absolute; top: -4px; right: -4px;
-    background: var(--accent2); color: white;
-    width: 20px; height: 20px; border-radius: 50%;
-    font-size: 0.7rem; font-weight: 700;
-    display: flex; align-items: center; justify-content: center;
-  }
-
-  /* CHAT FAB */
-  .chat-fab {
-    position: fixed; bottom: 2rem; right: 5rem;
-    background: var(--surface); color: var(--text);
-    border: 1px solid var(--border); width: 56px; height: 56px;
-    border-radius: 50%; cursor: pointer; font-size: 1.3rem;
-    transition: transform 0.2s, border-color 0.2s;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .chat-fab:hover { transform: scale(1.1); border-color: var(--accent); }
-
-  .loading { grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--muted); }
-</style>
+<link rel="stylesheet" href="custom.css">
 </head>
 <body>
 
@@ -206,7 +22,7 @@
 </nav>
 
 <div class="hero">
-  <h1>Renta tu<br><em>película</em><br>favorita</h1>
+  <h1>Renta tu película favorita</h1>
 </div>
 
 <div class="filters" id="filters">
@@ -217,31 +33,30 @@
   <div class="loading">Cargando catálogo...</div>
 </div>
 
+<!-- Botón flotante para ver carrito -->
 <button class="cart-fab" onclick="window.location.href='checkout.html'" title="Ver carrito">
   🎬 <span class="cart-count" id="cart-count">0</span>
 </button>
 
+<!-- Botón flotante para ir al chat -->
 <button class="chat-fab" onclick="window.location.href='chat.html'" title="Chat">💬</button>
 
 <script type="module">
-import { authAdapter, productAdapter, requireAuth, getToken } from './infraestructure/app.js';
+import { authAdapter, productAdapter, requireAuth } from './infraestructure/app.js';
 
 const token = requireAuth();
 if (!token) throw new Error('no auth');
 
-// Mostrar usuario
 authAdapter.getMe(token).then(u => {
   document.getElementById('nav-email').textContent = u.email.split('@')[0];
 }).catch(() => {});
 
 document.getElementById('btn-logout').addEventListener('click', () => authAdapter.logout(token));
 
-// Carrito en localStorage
 function getCarrito() { return JSON.parse(localStorage.getItem('carrito') || '[]'); }
 function updateCartCount() { document.getElementById('cart-count').textContent = getCarrito().length; }
 updateCartCount();
 
-// Cargar catálogo
 let allProducts = [];
 productAdapter.listarTodos().then(products => {
   allProducts = products;
@@ -278,11 +93,11 @@ function renderProducts(products) {
       <div class="card-img">
         ${p.imgurl ? `<img src="${p.imgurl}" alt="${p.titulo}" onerror="this.parentElement.textContent='🎬'">` : '🎬'}
       </div>
-      <span class="card-badge ${p.disponible ? '' : 'unavailable'}">${p.disponible ? 'Disponible' : 'No disponible'}</span>
+      <span class="card-badge">${p.disponible ? 'Disponible' : 'No disponible'}</span>
       <div class="card-body">
         <div class="card-genre">${p.genero || 'General'}</div>
-        <div class="card-title">${p.titulo}</div>
-        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:0.3rem">${p.duracion ? p.duracion + ' min' : ''}</div>
+        <h3 class="card-title">${p.titulo}</h3>
+        <div class="card-duration">${p.duracion ? p.duracion + ' min' : ''}</div>
         <div class="card-footer">
           <span class="card-price">$${Number(p.precio).toFixed(2)}</span>
           <button class="btn-renta" data-id="${p.id}" data-titulo="${p.titulo}" data-precio="${p.precio}" ${!p.disponible ? 'disabled' : ''}>
