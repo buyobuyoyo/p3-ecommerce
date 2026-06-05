@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis Pedidos — CineRenta</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing:border-box;margin:0;padding:0; }
+  :root { --bg:#0a0a0f;--surface:#13131a;--border:#222230;--accent:#e8c840;--accent2:#ff4d6d;--text:#f0f0f0;--muted:#666680; }
+  body { background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh; }
+
+  nav {
+    position:sticky;top:0;z-index:100;background:rgba(10,10,15,0.95);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--border);
+    display:flex;align-items:center;padding:0 2rem;height:60px;gap:2rem;
+  }
+  .nav-logo { font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--accent);text-decoration:none; }
+  .nav-links { display:flex;gap:1.5rem;margin-left:auto; }
+  .nav-links a { color:var(--muted);text-decoration:none;font-size:0.85rem;transition:color 0.2s; }
+  .nav-links a:hover, .nav-links a.active { color:var(--text); }
+
+  .page { max-width:900px;margin:3rem auto;padding:0 2rem; }
+  h1 { font-family:'Bebas Neue',sans-serif;font-size:2.5rem;margin-bottom:2rem; }
+
+  .table-wrap {
+    background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;
+  }
+  table { width:100%;border-collapse:collapse; }
+  thead tr { border-bottom:2px solid var(--border); }
+  th {
+    padding:0.8rem 1rem;text-align:left;
+    font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);
+  }
+  td { padding:0.9rem 1rem;font-size:0.88rem;border-bottom:1px solid var(--border); }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(255,255,255,0.02); }
+
+  .badge {
+    display:inline-block;padding:0.2rem 0.6rem;border-radius:20px;
+    font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;
+  }
+  .badge-activo { background:rgba(77,255,145,0.1);color:#4dff91;border:1px solid rgba(77,255,145,0.2); }
+  .badge-vencido { background:rgba(255,77,109,0.1);color:var(--accent2);border:1px solid rgba(255,77,109,0.2); }
+  .badge-devuelto { background:rgba(102,102,128,0.1);color:var(--muted);border:1px solid var(--border); }
+
+  .price { color:var(--accent);font-weight:500; }
+  .empty { text-align:center;padding:3rem;color:var(--muted); }
+  .loading { text-align:center;padding:3rem;color:var(--muted); }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">CineRenta</a>
+  <div class="nav-links">
+    <a href="index.html">Catálogo</a>
+    <a href="historial.html" class="active">Mis Pedidos</a>
+    <a href="chat.html">Chat</a>
+  </div>
+</nav>
+
+<div class="page">
+  <h1>Mis Pedidos</h1>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Película</th>
+          <th>Fecha Renta</th>
+          <th>Devolución</th>
+          <th>Total</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="5" class="loading">Cargando pedidos...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script type="module">
+import { pedidoAdapter, productAdapter, requireAuth } from '../src/presentation/app.js';
+const token = requireAuth();
+if (!token) throw new Error('no auth');
+
+async function load() {
+  const tbody = document.getElementById('tbody');
+  try {
+    const pedidos = await pedidoAdapter.misPedidos(token);
+    if (!pedidos.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty">No tienes pedidos aún. <a href="index.html" style="color:var(--accent)">Ver catálogo</a></td></tr>';
+      return;
+    }
+
+    // Fetch product titles
+    const productMap = {};
+    await Promise.all(pedidos.map(async p => {
+      if (!productMap[p.id_product]) {
+        try {
+          const prod = await productAdapter.obtener(p.id_product);
+          productMap[p.id_product] = prod.titulo;
+        } catch { productMap[p.id_product] = p.id_product; }
+      }
+    }));
+
+    tbody.innerHTML = pedidos.map(p => {
+      const badgeClass = p.estado === 'activo' ? 'badge-activo' : p.estado === 'vencido' ? 'badge-vencido' : 'badge-devuelto';
+      return `<tr>
+        <td>${productMap[p.id_product] || '—'}</td>
+        <td>${p.fecha_renta || '—'}</td>
+        <td>${p.fecha_devolucion || '—'}</td>
+        <td class="price">$${Number(p.total).toFixed(2)}</td>
+        <td><span class="badge ${badgeClass}">${p.estado}</span></td>
+      </tr>`;
+    }).join('');
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty">Error al cargar pedidos</td></tr>';
+  }
+}
+load();
+</script>
+</body>
+</html>

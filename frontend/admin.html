@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — CineRenta</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing:border-box;margin:0;padding:0; }
+  :root { --bg:#0a0a0f;--surface:#13131a;--border:#222230;--accent:#e8c840;--accent2:#ff4d6d;--text:#f0f0f0;--muted:#666680; }
+  body { background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh; }
+
+  nav {
+    position:sticky;top:0;z-index:100;background:rgba(10,10,15,0.95);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--border);
+    display:flex;align-items:center;padding:0 2rem;height:60px;gap:2rem;
+  }
+  .nav-logo { font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--accent);text-decoration:none; }
+  .admin-badge {
+    background:rgba(232,200,64,0.1);border:1px solid rgba(232,200,64,0.3);
+    color:var(--accent);font-size:0.65rem;letter-spacing:0.15em;
+    text-transform:uppercase;padding:0.2rem 0.6rem;border-radius:3px;
+  }
+  .nav-right { margin-left:auto;display:flex;align-items:center;gap:1rem; }
+  .btn-logout {
+    background:transparent;border:1px solid var(--border);color:var(--muted);
+    padding:0.35rem 0.75rem;font-size:0.75rem;cursor:pointer;border-radius:3px;
+    font-family:inherit;transition:all 0.2s;
+  }
+  .btn-logout:hover { border-color:var(--accent2);color:var(--accent2); }
+
+  .page { max-width:1100px;margin:2rem auto;padding:0 2rem; }
+
+  .tabs { display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:2rem; }
+  .tab {
+    padding:0.75rem 1.5rem;font-size:0.82rem;letter-spacing:0.08em;
+    text-transform:uppercase;cursor:pointer;color:var(--muted);
+    border-bottom:2px solid transparent;transition:all 0.2s;background:none;border-top:none;
+    border-left:none;border-right:none;font-family:inherit;
+  }
+  .tab:hover { color:var(--text); }
+  .tab.active { color:var(--accent);border-bottom-color:var(--accent); }
+
+  .tab-content { display:none; }
+  .tab-content.active { display:block; }
+
+  /* Products tab */
+  .products-header { display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem; }
+  .products-header h2 { font-family:'Bebas Neue',sans-serif;font-size:2rem; }
+  .btn-primary {
+    background:var(--accent);color:#0a0a0f;border:none;padding:0.6rem 1.2rem;
+    cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:0.08em;
+    border-radius:4px;transition:opacity 0.2s;
+  }
+  .btn-primary:hover { opacity:0.85; }
+
+  /* Modal */
+  .modal-overlay {
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);
+    z-index:200;align-items:center;justify-content:center;
+  }
+  .modal-overlay.open { display:flex; }
+  .modal {
+    background:var(--surface);border:1px solid var(--border);border-radius:8px;
+    padding:2rem;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;
+    position:relative;
+  }
+  .modal::before {
+    content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(to right,var(--accent),var(--accent2));border-radius:8px 8px 0 0;
+  }
+  .modal h3 { font-family:'Bebas Neue',sans-serif;font-size:1.5rem;margin-bottom:1.5rem; }
+  .form-group { margin-bottom:1rem; }
+  .form-group label { display:block;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.3rem; }
+  .form-group input, .form-group select {
+    width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);
+    padding:0.6rem 0.85rem;border-radius:4px;font-family:inherit;font-size:0.88rem;outline:none;
+    transition:border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus { border-color:var(--accent); }
+  .form-group select option { background:var(--surface); }
+  .modal-actions { display:flex;gap:0.75rem;margin-top:1.5rem; }
+  .btn-cancel {
+    flex:1;background:transparent;border:1px solid var(--border);color:var(--muted);
+    padding:0.7rem;cursor:pointer;border-radius:4px;font-family:inherit;transition:all 0.2s;
+  }
+  .btn-cancel:hover { border-color:var(--muted); color:var(--text); }
+  #modal-msg { font-size:0.8rem;color:var(--accent2);margin-top:0.75rem;min-height:1em; }
+  #modal-msg.ok { color:#4dff91; }
+
+  /* Products grid */
+  .products-grid {
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;
+  }
+  .admin-card {
+    background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;
+  }
+  .admin-card-img {
+    width:100%;height:140px;object-fit:cover;background:#1a1a28;
+    display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--muted);
+  }
+  .admin-card-img img { width:100%;height:100%;object-fit:cover; }
+  .admin-card-body { padding:1rem; }
+  .admin-card-title { font-family:'Bebas Neue',sans-serif;font-size:1.1rem;margin-bottom:0.3rem; }
+  .admin-card-meta { font-size:0.78rem;color:var(--muted);margin-bottom:0.75rem; }
+  .admin-card-actions { display:flex;gap:0.5rem; }
+  .btn-edit, .btn-delete {
+    flex:1;padding:0.4rem;font-size:0.75rem;cursor:pointer;border-radius:3px;
+    font-family:inherit;transition:all 0.2s;
+  }
+  .btn-edit { background:transparent;border:1px solid var(--border);color:var(--muted); }
+  .btn-edit:hover { border-color:var(--accent);color:var(--accent); }
+  .btn-delete { background:transparent;border:1px solid var(--border);color:var(--muted); }
+  .btn-delete:hover { border-color:var(--accent2);color:var(--accent2); }
+
+  /* Orders table */
+  .table-wrap { background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden; }
+  table { width:100%;border-collapse:collapse; }
+  thead tr { border-bottom:2px solid var(--border); }
+  th { padding:0.8rem 1rem;text-align:left;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted); }
+  td { padding:0.85rem 1rem;font-size:0.85rem;border-bottom:1px solid var(--border); }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(255,255,255,0.02); }
+  .badge { display:inline-block;padding:0.2rem 0.6rem;border-radius:20px;font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;font-weight:600; }
+  .badge-activo { background:rgba(77,255,145,0.1);color:#4dff91;border:1px solid rgba(77,255,145,0.2); }
+  .badge-vencido { background:rgba(255,77,109,0.1);color:var(--accent2);border:1px solid rgba(255,77,109,0.2); }
+  .badge-devuelto { background:rgba(102,102,128,0.1);color:var(--muted);border:1px solid var(--border); }
+  .price { color:var(--accent); }
+  select.estado-select {
+    background:var(--bg);border:1px solid var(--border);color:var(--text);
+    padding:0.3rem 0.5rem;border-radius:3px;font-family:inherit;font-size:0.8rem;cursor:pointer;
+  }
+
+  .loading { text-align:center;padding:3rem;color:var(--muted); }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">CineRenta</a>
+  <span class="admin-badge">Admin</span>
+  <div class="nav-right">
+    <button class="btn-logout" id="btn-logout">Salir</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="tabs">
+    <button class="tab active" data-tab="products">Películas</button>
+    <button class="tab" data-tab="orders">Pedidos</button>
+  </div>
+
+  <!-- PRODUCTS TAB -->
+  <div class="tab-content active" id="tab-products">
+    <div class="products-header">
+      <h2>Catálogo</h2>
+      <button class="btn-primary" id="btn-new">+ Nueva Película</button>
+    </div>
+    <div class="products-grid" id="products-grid">
+      <div class="loading">Cargando...</div>
+    </div>
+  </div>
+
+  <!-- ORDERS TAB -->
+  <div class="tab-content" id="tab-orders">
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:2rem;margin-bottom:1.5rem">Pedidos</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Producto</th><th>Fecha Renta</th><th>Total</th><th>Estado</th></tr>
+        </thead>
+        <tbody id="orders-tbody"><tr><td colspan="5" class="loading">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3 id="modal-title">Nueva Película</h3>
+    <div class="form-group"><label>Título *</label><input id="f-titulo" placeholder="Nombre de la película"></div>
+    <div class="form-group"><label>Descripción *</label><input id="f-descripcion" placeholder="Sinopsis breve"></div>
+    <div class="form-group"><label>Género *</label><input id="f-genero" placeholder="Acción, Drama, Comedia..."></div>
+    <div class="form-group"><label>Precio *</label><input id="f-precio" type="number" step="0.01" placeholder="0.00"></div>
+    <div class="form-group"><label>URL de imagen</label><input id="f-imgurl" placeholder="https://..."></div>
+    <div class="form-group"><label>Duración (min)</label><input id="f-duracion" type="number" placeholder="120"></div>
+    <div class="form-group"><label>Año de lanzamiento</label><input id="f-lanzamiento" placeholder="2024"></div>
+    <div id="modal-msg"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btn-cancel">Cancelar</button>
+      <button class="btn-primary" id="btn-save" style="flex:2">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { authAdapter, productAdapter, pedidoAdapter, requireAuth, getToken } from '../src/presentation/app.js';
+const token = requireAuth();
+if (!token) throw new Error('no auth');
+
+document.getElementById('btn-logout').addEventListener('click', () => authAdapter.logout(token));
+
+// TABS
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    if (tab.dataset.tab === 'orders') loadOrders();
+  });
+});
+
+// ── PRODUCTS ──
+let editingId = null;
+
+async function loadProducts() {
+  const grid = document.getElementById('products-grid');
+  try {
+    const products = await productAdapter.listarTodos();
+    if (!products.length) { grid.innerHTML = '<div class="loading">Sin películas</div>'; return; }
+    grid.innerHTML = products.map(p => `
+      <div class="admin-card">
+        <div class="admin-card-img">
+          ${p.imgurl ? `<img src="${p.imgurl}" alt="${p.titulo}" onerror="this.parentElement.textContent='🎬'">` : '🎬'}
+        </div>
+        <div class="admin-card-body">
+          <div class="admin-card-title">${p.titulo}</div>
+          <div class="admin-card-meta">${p.genero || ''} · $${Number(p.precio).toFixed(2)} · ${p.disponible ? 'Disponible' : 'No disponible'}</div>
+          <div class="admin-card-actions">
+            <button class="btn-edit" data-id="${p.id}" data-titulo="${p.titulo}" data-desc="${p.descripcion || ''}"
+              data-genero="${p.genero || ''}" data-precio="${p.precio}" data-img="${p.imgurl || ''}"
+              data-dur="${p.duracion || ''}" data-lanz="${p.lanzamiento || ''}">Editar</button>
+            <button class="btn-delete" data-id="${p.id}">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    grid.querySelectorAll('.btn-edit').forEach(btn => {
+      btn.addEventListener('click', () => {
+        editingId = btn.dataset.id;
+        document.getElementById('modal-title').textContent = 'Editar Película';
+        document.getElementById('f-titulo').value = btn.dataset.titulo;
+        document.getElementById('f-descripcion').value = btn.dataset.desc;
+        document.getElementById('f-genero').value = btn.dataset.genero;
+        document.getElementById('f-precio').value = btn.dataset.precio;
+        document.getElementById('f-imgurl').value = btn.dataset.img;
+        document.getElementById('f-duracion').value = btn.dataset.dur;
+        document.getElementById('f-lanzamiento').value = btn.dataset.lanz;
+        document.getElementById('modal-msg').textContent = '';
+        document.getElementById('modal').classList.add('open');
+      });
+    });
+
+    grid.querySelectorAll('.btn-delete').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('¿Eliminar esta película?')) return;
+        try {
+          await productAdapter.eliminar(btn.dataset.id, token);
+          loadProducts();
+        } catch { alert('Error al eliminar'); }
+      });
+    });
+  } catch (e) {
+    grid.innerHTML = '<div class="loading">Error al cargar. ¿Eres admin?</div>';
+  }
+}
+
+document.getElementById('btn-new').addEventListener('click', () => {
+  editingId = null;
+  document.getElementById('modal-title').textContent = 'Nueva Película';
+  ['titulo','descripcion','genero','precio','imgurl','duracion','lanzamiento'].forEach(f => {
+    document.getElementById('f-'+f).value = '';
+  });
+  document.getElementById('modal-msg').textContent = '';
+  document.getElementById('modal').classList.add('open');
+});
+
+document.getElementById('btn-cancel').addEventListener('click', () => document.getElementById('modal').classList.remove('open'));
+
+document.getElementById('btn-save').addEventListener('click', async () => {
+  const titulo = document.getElementById('f-titulo').value.trim();
+  const descripcion = document.getElementById('f-descripcion').value.trim();
+  const genero = document.getElementById('f-genero').value.trim();
+  const precio = document.getElementById('f-precio').value;
+  const msg = document.getElementById('modal-msg');
+
+  if (!titulo || !descripcion || !genero || !precio) { msg.textContent = 'Completa los campos requeridos'; return; }
+
+  const datos = { titulo, descripcion, genero, precio };
+  const imgurl = document.getElementById('f-imgurl').value.trim();
+  const duracion = document.getElementById('f-duracion').value.trim();
+  const lanzamiento = document.getElementById('f-lanzamiento').value.trim();
+  if (imgurl) datos.imgurl = imgurl;
+  if (duracion) datos.duracion = duracion;
+  if (lanzamiento) datos.lanzamiento = lanzamiento;
+
+  try {
+    if (editingId) {
+      await productAdapter.actualizar(editingId, datos, token);
+    } else {
+      await productAdapter.crear(datos, token);
+    }
+    msg.className = 'ok'; msg.textContent = '✓ Guardado';
+    setTimeout(() => { document.getElementById('modal').classList.remove('open'); loadProducts(); }, 800);
+  } catch (e) {
+    msg.className = ''; msg.textContent = 'Error al guardar. Verifica tu rol.';
+  }
+});
+
+// ── ORDERS ──
+async function loadOrders() {
+  const tbody = document.getElementById('orders-tbody');
+  try {
+    const pedidos = await pedidoAdapter.todos(token);
+    if (!pedidos.length) { tbody.innerHTML = '<tr><td colspan="5" class="loading">Sin pedidos</td></tr>'; return; }
+    tbody.innerHTML = pedidos.map(p => {
+      const badgeClass = p.estado === 'activo' ? 'badge-activo' : p.estado === 'vencido' ? 'badge-vencido' : 'badge-devuelto';
+      return `<tr>
+        <td style="font-family:monospace;font-size:0.75rem;color:var(--muted)">${p.id?.slice(0,8)}...</td>
+        <td style="font-family:monospace;font-size:0.75rem;color:var(--muted)">${p.id_product?.slice(0,8)}...</td>
+        <td>${p.fecha_renta || '—'}</td>
+        <td class="price">$${Number(p.total).toFixed(2)}</td>
+        <td>
+          <select class="estado-select" data-id="${p.id}">
+            <option value="activo" ${p.estado==='activo'?'selected':''}>activo</option>
+            <option value="devuelto" ${p.estado==='devuelto'?'selected':''}>devuelto</option>
+            <option value="vencido" ${p.estado==='vencido'?'selected':''}>vencido</option>
+          </select>
+        </td>
+      </tr>`;
+    }).join('');
+
+    tbody.querySelectorAll('.estado-select').forEach(sel => {
+      sel.addEventListener('change', async () => {
+        try {
+          await pedidoAdapter.actualizarEstado(sel.dataset.id, sel.value, token);
+        } catch { alert('Error al actualizar estado'); }
+      });
+    });
+  } catch {
+    tbody.innerHTML = '<tr><td colspan="5" class="loading">Error al cargar pedidos</td></tr>';
+  }
+}
+
+loadProducts();
+</script>
+</body>
+</html>

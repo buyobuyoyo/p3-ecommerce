@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat — CineRenta</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing:border-box;margin:0;padding:0; }
+  :root { --bg:#0a0a0f;--surface:#13131a;--border:#222230;--accent:#e8c840;--accent2:#ff4d6d;--text:#f0f0f0;--muted:#666680; }
+  body { background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;height:100vh;display:flex;flex-direction:column; }
+
+  nav {
+    background:rgba(10,10,15,0.95);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+    display:flex;align-items:center;padding:0 2rem;height:60px;gap:2rem;flex-shrink:0;
+  }
+  .nav-logo { font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--accent);text-decoration:none; }
+  .nav-links { display:flex;gap:1.5rem;margin-left:auto; }
+  .nav-links a { color:var(--muted);text-decoration:none;font-size:0.85rem;transition:color 0.2s; }
+  .nav-links a:hover, .nav-links a.active { color:var(--text); }
+
+  .chat-container {
+    flex:1;max-width:700px;width:100%;margin:0 auto;
+    display:flex;flex-direction:column;padding:1.5rem;gap:1rem;overflow:hidden;
+  }
+
+  .chat-header {
+    display:flex;align-items:center;gap:0.75rem;flex-shrink:0;
+  }
+  .chat-header h2 { font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.05em; }
+  .status-dot {
+    width:8px;height:8px;border-radius:50%;background:var(--muted);
+    transition:background 0.3s;
+  }
+  .status-dot.connected { background:#4dff91; }
+  .status-label { font-size:0.75rem;color:var(--muted); }
+
+  .messages {
+    flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:0.75rem;
+    padding-right:0.25rem;
+  }
+  .messages::-webkit-scrollbar { width:4px; }
+  .messages::-webkit-scrollbar-track { background:transparent; }
+  .messages::-webkit-scrollbar-thumb { background:var(--border);border-radius:2px; }
+
+  .msg {
+    max-width:75%;padding:0.75rem 1rem;border-radius:12px;
+    font-size:0.88rem;line-height:1.5;word-break:break-word;
+    animation:fadeUp 0.2s ease;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+  .msg-cliente {
+    background:var(--accent);color:#0a0a0f;
+    align-self:flex-end;border-bottom-right-radius:3px;
+  }
+  .msg-asistente {
+    background:var(--surface);border:1px solid var(--border);
+    align-self:flex-start;border-bottom-left-radius:3px;
+  }
+  .msg-meta {
+    font-size:0.65rem;margin-top:0.25rem;opacity:0.6;
+  }
+  .msg-cliente .msg-meta { text-align:right; }
+
+  .system-msg {
+    text-align:center;font-size:0.75rem;color:var(--muted);
+    padding:0.5rem;
+  }
+
+  .input-row {
+    display:flex;gap:0.75rem;flex-shrink:0;
+  }
+  .chat-input {
+    flex:1;background:var(--surface);border:1px solid var(--border);
+    color:var(--text);padding:0.75rem 1rem;border-radius:8px;
+    font-family:inherit;font-size:0.9rem;outline:none;
+    transition:border-color 0.2s;resize:none;height:48px;
+  }
+  .chat-input:focus { border-color:var(--accent); }
+  .btn-send {
+    background:var(--accent);color:#0a0a0f;border:none;
+    width:48px;height:48px;border-radius:8px;cursor:pointer;
+    font-size:1.1rem;transition:opacity 0.2s;flex-shrink:0;
+  }
+  .btn-send:hover { opacity:0.85; }
+  .btn-send:disabled { opacity:0.4;cursor:not-allowed; }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">CineRenta</a>
+  <div class="nav-links">
+    <a href="index.html">Catálogo</a>
+    <a href="historial.html">Mis Pedidos</a>
+    <a href="chat.html" class="active">Chat</a>
+  </div>
+</nav>
+
+<div class="chat-container">
+  <div class="chat-header">
+    <div class="status-dot" id="status-dot"></div>
+    <h2>Soporte</h2>
+    <span class="status-label" id="status-label">Conectando...</span>
+  </div>
+
+  <div class="messages" id="messages">
+    <div class="system-msg">Iniciando conversación...</div>
+  </div>
+
+  <div class="input-row">
+    <input class="chat-input" id="chat-input" placeholder="Escribe tu mensaje..." disabled>
+    <button class="btn-send" id="btn-send" disabled>➤</button>
+  </div>
+</div>
+
+<script type="module">
+import { chatAdapter, requireAuth, BACKEND } from '../src/presentation/app.js';
+const token = requireAuth();
+if (!token) throw new Error('no auth');
+
+const messages = document.getElementById('messages');
+const input = document.getElementById('chat-input');
+const btnSend = document.getElementById('btn-send');
+const statusDot = document.getElementById('status-dot');
+const statusLabel = document.getElementById('status-label');
+
+function addMessage(contenido, remitente, timestamp) {
+  const div = document.createElement('div');
+  div.className = `msg msg-${remitente}`;
+  const time = timestamp ? new Date(timestamp).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'}) : '';
+  div.innerHTML = `${contenido}<div class="msg-meta">${remitente === 'asistente' ? '🤖 Asistente' : 'Tú'} ${time}</div>`;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function systemMsg(text) {
+  const div = document.createElement('div');
+  div.className = 'system-msg';
+  div.textContent = text;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+async function init() {
+  try {
+    const convId = await chatAdapter.iniciarConversacion(token, BACKEND);
+
+    chatAdapter.conectar(convId, (data) => {
+      addMessage(data.contenido, data.remitente, data.timestamp);
+    }, (err) => {
+      systemMsg('Error de conexión. Recarga la página.');
+    });
+
+    // Wait for connection
+    setTimeout(() => {
+      statusDot.classList.add('connected');
+      statusLabel.textContent = 'Conectado';
+      input.disabled = false;
+      btnSend.disabled = false;
+      messages.innerHTML = '';
+      addMessage('¡Hola! Soy el asistente automático de CineRenta. ¿En qué te puedo ayudar?', 'asistente');
+      input.focus();
+    }, 600);
+
+  } catch (e) {
+    systemMsg('No se pudo iniciar el chat. Verifica tu sesión.');
+  }
+}
+
+function enviar() {
+  const texto = input.value.trim();
+  if (!texto || btnSend.disabled) return;
+  chatAdapter.enviar(texto);
+  input.value = '';
+}
+
+btnSend.addEventListener('click', enviar);
+input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar(); } });
+
+init();
+</script>
+</body>
+</html>

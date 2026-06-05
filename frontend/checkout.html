@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout — CineRenta</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg:#0a0a0f;--surface:#13131a;--border:#222230;--accent:#e8c840;--accent2:#ff4d6d;--text:#f0f0f0;--muted:#666680; }
+  body { background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh; }
+
+  nav {
+    position:sticky;top:0;z-index:100;background:rgba(10,10,15,0.95);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--border);
+    display:flex;align-items:center;padding:0 2rem;height:60px;gap:2rem;
+  }
+  .nav-logo { font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--accent);text-decoration:none; }
+  .nav-links { display:flex;gap:1.5rem;margin-left:auto; }
+  .nav-links a { color:var(--muted);text-decoration:none;font-size:0.85rem;transition:color 0.2s; }
+  .nav-links a:hover { color:var(--text); }
+
+  .page { max-width:900px;margin:3rem auto;padding:0 2rem; }
+  h1 { font-family:'Bebas Neue',sans-serif;font-size:2.5rem;margin-bottom:2rem; }
+
+  .layout { display:grid;grid-template-columns:1fr 360px;gap:2rem;align-items:start; }
+  @media(max-width:700px){ .layout{grid-template-columns:1fr;} }
+
+  .section-title {
+    font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:1rem;
+  }
+
+  /* Cart items */
+  .cart-items { display:flex;flex-direction:column;gap:0.75rem; }
+  .cart-item {
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:6px;padding:1rem;
+    display:flex;justify-content:space-between;align-items:center;gap:1rem;
+  }
+  .cart-item-info h3 { font-size:0.95rem;margin-bottom:0.2rem; }
+  .cart-item-info span { font-size:0.8rem;color:var(--muted); }
+  .cart-item-price { color:var(--accent);font-weight:500; }
+  .btn-remove {
+    background:transparent;border:none;color:var(--muted);cursor:pointer;
+    font-size:1rem;transition:color 0.2s;padding:0.2rem;
+  }
+  .btn-remove:hover { color:var(--accent2); }
+
+  .empty-cart { text-align:center;padding:3rem;color:var(--muted); }
+
+  /* Form */
+  .checkout-form { background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:1.5rem; }
+  .form-group { margin-bottom:1.25rem; }
+  .form-group label {
+    display:block;font-size:0.72rem;letter-spacing:0.1em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;
+  }
+  .form-group input {
+    width:100%;background:var(--bg);border:1px solid var(--border);
+    color:var(--text);padding:0.65rem 0.85rem;border-radius:4px;
+    font-family:inherit;font-size:0.9rem;outline:none;transition:border-color 0.2s;
+  }
+  .form-group input:focus { border-color:var(--accent); }
+
+  .total-row {
+    display:flex;justify-content:space-between;align-items:center;
+    padding:1rem 0;border-top:1px solid var(--border);margin-top:1rem;
+  }
+  .total-label { font-size:0.85rem;color:var(--muted); }
+  .total-amount { font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--accent); }
+
+  .btn-confirm {
+    width:100%;padding:1rem;background:var(--accent);color:#0a0a0f;
+    border:none;cursor:pointer;font-family:'Bebas Neue',sans-serif;
+    font-size:1.2rem;letter-spacing:0.1em;border-radius:4px;
+    transition:opacity 0.2s;margin-top:1rem;
+  }
+  .btn-confirm:hover { opacity:0.85; }
+  .btn-confirm:disabled { opacity:0.4;cursor:not-allowed; }
+
+  #checkout-msg {
+    margin-top:1rem;font-size:0.82rem;text-align:center;
+    color:var(--accent2);min-height:1.2em;
+  }
+  #checkout-msg.ok { color:#4dff91; }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">CineRenta</a>
+  <div class="nav-links">
+    <a href="index.html">Catálogo</a>
+    <a href="historial.html">Mis Pedidos</a>
+    <a href="chat.html">Chat</a>
+  </div>
+</nav>
+
+<div class="page">
+  <h1>Checkout</h1>
+  <div class="layout">
+    <div>
+      <div class="section-title">Tu carrito</div>
+      <div class="cart-items" id="cart-items"></div>
+    </div>
+    <div>
+      <div class="checkout-form">
+        <div class="section-title">Datos de renta</div>
+        <div class="form-group">
+          <label>Fecha de renta</label>
+          <input type="date" id="fecha-renta">
+        </div>
+        <div class="form-group">
+          <label>Fecha de devolución</label>
+          <input type="date" id="fecha-devolucion">
+        </div>
+        <div class="total-row">
+          <span class="total-label">Total</span>
+          <span class="total-amount" id="total">$0.00</span>
+        </div>
+        <button class="btn-confirm" id="btn-confirm">Confirmar Renta</button>
+        <div id="checkout-msg"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { pedidoAdapter, requireAuth } from '../src/presentation/app.js';
+const token = requireAuth();
+if (!token) throw new Error('no auth');
+
+// Fechas default
+const today = new Date();
+const nextWeek = new Date(today); nextWeek.setDate(today.getDate() + 7);
+document.getElementById('fecha-renta').value = today.toISOString().split('T')[0];
+document.getElementById('fecha-devolucion').value = nextWeek.toISOString().split('T')[0];
+
+function getCarrito() { return JSON.parse(localStorage.getItem('carrito') || '[]'); }
+
+function renderCart() {
+  const carrito = getCarrito();
+  const container = document.getElementById('cart-items');
+  if (!carrito.length) {
+    container.innerHTML = '<div class="empty-cart">Tu carrito está vacío.<br><a href="index.html" style="color:var(--accent)">Ver catálogo</a></div>';
+    document.getElementById('total').textContent = '$0.00';
+    document.getElementById('btn-confirm').disabled = true;
+    return;
+  }
+  const total = carrito.reduce((s, i) => s + i.precio, 0);
+  document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+  container.innerHTML = carrito.map(item => `
+    <div class="cart-item">
+      <div class="cart-item-info">
+        <h3>${item.titulo}</h3>
+        <span>1 semana de renta</span>
+      </div>
+      <span class="cart-item-price">$${Number(item.precio).toFixed(2)}</span>
+      <button class="btn-remove" data-id="${item.id}" title="Quitar">✕</button>
+    </div>
+  `).join('');
+  container.querySelectorAll('.btn-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const carrito = getCarrito().filter(i => i.id !== btn.dataset.id);
+      localStorage.setItem('carrito', JSON.stringify(carrito));
+      renderCart();
+    });
+  });
+}
+renderCart();
+
+document.getElementById('btn-confirm').addEventListener('click', async () => {
+  const carrito = getCarrito();
+  if (!carrito.length) return;
+  const fechaRenta = document.getElementById('fecha-renta').value;
+  const fechaDev = document.getElementById('fecha-devolucion').value;
+  if (!fechaRenta || !fechaDev) { document.getElementById('checkout-msg').textContent = 'Completa las fechas'; return; }
+
+  const btn = document.getElementById('btn-confirm');
+  btn.disabled = true; btn.textContent = 'Procesando...';
+  const msg = document.getElementById('checkout-msg');
+  const total = carrito.reduce((s, i) => s + i.precio, 0);
+
+  try {
+    for (const item of carrito) {
+      await pedidoAdapter.crear({
+        id_product: item.id,
+        fecha_renta: fechaRenta,
+        fecha_devolucion: fechaDev,
+        total: item.precio
+      }, token);
+    }
+    localStorage.removeItem('carrito');
+    msg.className = 'ok';
+    msg.textContent = '✓ Renta confirmada. Redirigiendo...';
+    setTimeout(() => window.location.href = 'historial.html', 1200);
+  } catch (e) {
+    msg.className = '';
+    msg.textContent = 'Error al procesar la renta. Intenta de nuevo.';
+    btn.disabled = false; btn.textContent = 'Confirmar Renta';
+  }
+});
+</script>
+</body>
+</html>

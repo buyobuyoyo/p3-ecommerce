@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iniciar Sesión — CineRenta</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --border: #222230;
+    --accent: #e8c840;
+    --accent2: #ff4d6d;
+    --text: #f0f0f0;
+    --muted: #666680;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ── Film strip left panel ── */
+  .panel-visual {
+    flex: 1;
+    position: relative;
+    background: #07070d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .film-strip {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .film-strip.left { left: 20px; }
+  .film-strip.right { right: 20px; }
+
+  .film-hole {
+    width: 80px;
+    height: 60px;
+    border: 3px solid #1a1a2e;
+    background: #07070d;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .film-hole::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    background: #111120;
+    border-radius: 3px;
+  }
+
+  .panel-text {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 2rem;
+  }
+  .panel-text h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 8vw, 7rem);
+    line-height: 0.9;
+    letter-spacing: 0.05em;
+    background: linear-gradient(135deg, var(--accent) 0%, #fff8d6 50%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .panel-text p {
+    margin-top: 1rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .diagonal-line {
+    position: absolute;
+    width: 2px;
+    height: 200%;
+    background: linear-gradient(to bottom, transparent, var(--accent) 40%, var(--accent2) 60%, transparent);
+    opacity: 0.15;
+    transform: rotate(15deg);
+    top: -50%;
+  }
+
+  /* ── Login form right panel ── */
+  .panel-form {
+    width: 420px;
+    flex-shrink: 0;
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 3rem;
+    border-left: 1px solid var(--border);
+    position: relative;
+  }
+
+  .panel-form::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(to right, var(--accent), var(--accent2));
+  }
+
+  .form-tag {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 2rem;
+  }
+
+  .form-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+  .form-subtitle {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 2.5rem;
+  }
+
+  /* Token input section */
+  .token-section { margin-bottom: 2rem; }
+  .token-section label {
+    display: block;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+  .token-section input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.75rem 1rem;
+    font-family: monospace;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .token-section input:focus { border-color: var(--accent); }
+  .token-section input::placeholder { color: var(--muted); }
+
+  .btn {
+    width: 100%;
+    padding: 0.9rem;
+    border: none;
+    cursor: pointer;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    border-radius: 4px;
+    transition: transform 0.15s, opacity 0.15s;
+  }
+  .btn:hover { transform: translateY(-1px); opacity: 0.9; }
+  .btn:active { transform: translateY(0); }
+
+  .btn-github {
+    background: var(--accent);
+    color: #0a0a0f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .btn-token {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-token:hover { border-color: var(--accent); }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .step-hint {
+    background: #0f0f1a;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .step-hint strong { color: var(--accent); }
+
+  #msg {
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    text-align: center;
+    min-height: 1.2em;
+    color: var(--accent2);
+  }
+  #msg.ok { color: #4dff91; }
+</style>
+</head>
+<body>
+
+<div class="panel-visual">
+  <div class="diagonal-line" style="left:30%"></div>
+  <div class="diagonal-line" style="left:60%"></div>
+  <div class="film-strip left">
+    <script>for(let i=0;i<30;i++) document.write('<div class="film-hole"></div>')</script>
+  </div>
+  <div class="film-strip right">
+    <script>for(let i=0;i<30;i++) document.write('<div class="film-hole"></div>')</script>
+  </div>
+  <div class="panel-text">
+    <h1>Cine<br>Renta</h1>
+    <p>Tu videoclubdigital</p>
+  </div>
+</div>
+
+<div class="panel-form">
+  <div class="form-tag">Acceso al sistema</div>
+  <div class="form-title">Iniciar Sesión</div>
+  <div class="form-subtitle">Usa tu cuenta de GitHub para entrar</div>
+
+  <button class="btn btn-github" id="btn-github">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+    </svg>
+    Entrar con GitHub
+  </button>
+
+  <div class="divider">o ingresa tu token manualmente</div>
+
+  <div class="token-section">
+    <label>Access Token</label>
+    <input type="text" id="token-input" placeholder="eyJ..." />
+  </div>
+
+  <button class="btn btn-token" id="btn-token">Ingresar con Token</button>
+
+  <div class="step-hint">
+    <strong>¿Cómo obtener tu token?</strong><br>
+    1. Haz clic en "Entrar con GitHub"<br>
+    2. Autoriza la app en GitHub<br>
+    3. Copia el <strong>access_token</strong> de la URL<br>
+    4. Pégalo arriba y haz clic en "Ingresar"
+  </div>
+
+  <div id="msg"></div>
+</div>
+
+<script type="module">
+  import { authAdapter, BACKEND } from '../src/presentation/app.js';
+
+  const msg = document.getElementById('msg');
+
+  document.getElementById('btn-github').addEventListener('click', async () => {
+    const res = await fetch(`${BACKEND}/auth/login/github`);
+    const data = await res.json();
+    window.location.href = data.url;
+  });
+
+  document.getElementById('btn-token').addEventListener('click', async () => {
+    const token = document.getElementById('token-input').value.trim();
+    if (!token) { msg.textContent = 'Pega tu token primero'; return; }
+
+    try {
+      await authAdapter.getMe(token);
+      localStorage.setItem('token', token);
+      // Auto-register en caso de primer login
+      try { await authAdapter.register(token); } catch {}
+      msg.className = 'ok';
+      msg.textContent = '✓ Autenticado. Redirigiendo...';
+      setTimeout(() => window.location.href = 'index.html', 800);
+    } catch {
+      msg.className = '';
+      msg.textContent = 'Token inválido o expirado.';
+    }
+  });
+</script>
+</body>
+</html>
