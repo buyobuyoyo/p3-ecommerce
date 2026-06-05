@@ -81,4 +81,9 @@ class FAQRepository(RespuestaAutomaticaPort):
             for keyword in entrada["keywords"]:
                 if keyword in texto_lower:
                     return entrada["respuesta"]
-        return None
+        
+        return (
+            "Lo siento, no logré entender tu consulta. "
+            "¿Podrías intentar con palabras como 'precio', 'horario' o 'pedido'? "
+            "De igual forma, un asistente humano revisará tu mensaje pronto."
+        )
