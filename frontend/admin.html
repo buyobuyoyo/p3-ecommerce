@@ -56,8 +56,13 @@
     <div class="form-group"><label>Descripción *</label><input id="f-descripcion" placeholder="Sinopsis breve"></div>
     <div class="form-group"><label>Género *</label><input id="f-genero" placeholder="Acción, Drama, Comedia..."></div>
     <div class="form-group"><label>Precio *</label><input id="f-precio" type="number" step="0.01" placeholder="0.00"></div>
-    <div class="form-group"><label>URL de imagen</label><input id="f-imgurl" placeholder="https://..."></div>
-    <input type="file" id="subirImagen" accept="image/*">
+    <div class="form-group">
+  <label>Imagen</label>
+  <input type="file" id="f-imgfile" accept="image/*">
+  <div id="img-preview" style="margin-top:0.5rem;display:none">
+    <img id="img-preview-img" style="width:100%;max-height:120px;object-fit:cover;border-radius:4px;border:1px solid var(--border)">
+  </div>
+</div>
     <img id="vistaPrevia" src="" alt="Vista previa de la imagen" style="display: none; max-width: 300px;">
     <div class="form-group"><label>Duración (min)</label><input id="f-duracion" type="number" placeholder="120"></div>
     <div class="form-group"><label>Año de lanzamiento</label><input id="f-lanzamiento" placeholder="2024"></div>
@@ -70,7 +75,7 @@
 </div>
 
 <script type="module">
-import { authAdapter, productAdapter, pedidoAdapter, requireAuth } from './infraestructure/app.js';
+import { authAdapter, productAdapter, pedidoAdapter, requireAuth, getToken, BACKEND } from './infraestructure/app.js';
 const token = requireAuth();
 if (!token) throw new Error('no auth');
 
@@ -153,6 +158,15 @@ document.getElementById('btn-new').addEventListener('click', () => {
 
 document.getElementById('btn-cancel').addEventListener('click', () => document.getElementById('modal').classList.remove('open'));
 
+document.getElementById('f-imgfile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const preview = document.getElementById('img-preview');
+  const img = document.getElementById('img-preview-img');
+  img.src = URL.createObjectURL(file);
+  preview.style.display = 'block';
+});
+
 document.getElementById('btn-save').addEventListener('click', async () => {
   const titulo = document.getElementById('f-titulo').value.trim();
   const descripcion = document.getElementById('f-descripcion').value.trim();
@@ -160,15 +174,28 @@ document.getElementById('btn-save').addEventListener('click', async () => {
   const precio = document.getElementById('f-precio').value;
   const msg = document.getElementById('modal-msg');
 
-  if (!titulo || !descripcion || !genero || !precio) { msg.textContent = 'Completa los campos requeridos'; return; }
-
+  if (!titulo || !descripcion || !genero || !precio) {
+    msg.textContent = 'Completa los campos requeridos'; return;
+  }
   const datos = { titulo, descripcion, genero, precio };
-  const imgurl = document.getElementById('f-imgurl').value.trim();
   const duracion = document.getElementById('f-duracion').value.trim();
   const lanzamiento = document.getElementById('f-lanzamiento').value.trim();
-  if (imgurl) datos.imgurl = imgurl;
   if (duracion) datos.duracion = duracion;
   if (lanzamiento) datos.lanzamiento = lanzamiento;
+  const fileInput = document.getElementById('f-imgfile');
+  if (fileInput.files[0]) {
+    msg.textContent = 'Subiendo imagen...';
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    const res = await fetch(`${BACKEND}/product/upload-imagen`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: formData
+    });
+    if (!res.ok) { msg.textContent = 'Error al subir imagen'; return; }
+    const data = await res.json();
+    datos.imgurl = data.url;
+  }
 
   try {
     if (editingId) {
@@ -178,8 +205,8 @@ document.getElementById('btn-save').addEventListener('click', async () => {
     }
     msg.className = 'ok'; msg.textContent = '✓ Guardado';
     setTimeout(() => { document.getElementById('modal').classList.remove('open'); loadProducts(); }, 800);
-  } catch (e) {
-    msg.className = ''; msg.textContent = 'Error al guardar. Verifica tu rol.';
+  } catch {
+    msg.className = ''; msg.textContent = 'Error al guardar.';
   }
 });
 

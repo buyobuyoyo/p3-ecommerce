@@ -1,6 +1,11 @@
 from fastapi import APIRouter, Depends
 from app.database import supabase
 from app.dependencies import get_current_user, require_role
+from fastapi import APIRouter, Depends, UploadFile, File
+from app.database import supabase
+from app.dependencies import require_role
+import uuid
+
 
 router = APIRouter()
 
@@ -67,3 +72,21 @@ def actualizar_product(
 def eliminar_product(id_product: str, _user=Depends(require_role("admin"))):  #solo admin
     data = supabase.table("Product").delete().eq("id_product", id_product).execute()
     return data
+
+@router.post("/upload-imagen")
+async def upload_imagen(
+    file: UploadFile = File(...),
+    _user=Depends(require_role("admin"))
+):
+    ext = file.filename.split(".")[-1]
+    nombre = f"{uuid.uuid4()}.{ext}"
+    contenido = await file.read()
+    
+    supabase.storage.from_("imagenes").upload(
+        path=nombre,
+        file=contenido,
+        file_options={"content-type": file.content_type}
+    )
+    
+    url = supabase.storage.from_("imagenes").get_public_url(nombre)
+    return {"url": url}
