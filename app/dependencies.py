@@ -17,20 +17,23 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
 
 
 def require_role(required_role: str):
-    """
-    Fábrica de dependencias. Uso:
-        _user = Depends(require_role("admin"))
-    Verifica que el usuario tenga el rol requerido en su Profile.
-    """
     def role_checker(current_user=Depends(get_current_user)):
-        profile = (
-            supabase.table("Profile")
-            .select("rol")
-            .eq("user_id", current_user.id)
-            .single()
-            .execute()
-        )
-        if not profile.data or profile.data.get("rol") != required_role:
-            raise HTTPException(status_code=403, detail="No tienes permiso para esta acción")
-        return current_user
+        try:
+            profile = (
+                supabase.table("Profile")
+                .select("rol")
+                .eq("user_id", current_user.id)
+                .single()
+                .execute()
+            )
+            if not profile.data or profile.data.get("rol") != required_role:
+                raise HTTPException(status_code=403, detail="No tienes permiso para esta acción")
+            return current_user
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))  # temporal
     return role_checker
+
+
+    
