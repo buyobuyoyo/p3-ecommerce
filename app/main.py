@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+from app.routers import chat  
 from app.routers import profile, product, pedido, auth
 
 app = FastAPI(
@@ -25,6 +25,7 @@ app.include_router(auth.router,    prefix="/auth",    tags=["Auth"])
 app.include_router(profile.router, prefix="/profile", tags=["Profile"])
 app.include_router(product.router, prefix="/product", tags=["Product"])
 app.include_router(pedido.router,  prefix="/pedido",  tags=["Pedido"])
+app.include_router(chat.router, prefix="/chat", tags=["Chat"]) 
 
 
 @app.get("/", tags=["Root"])
