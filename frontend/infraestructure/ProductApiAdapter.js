@@ -3,17 +3,20 @@ import { Product } from './Product.js';
 export class ProductApiAdapter {
     constructor(baseUrl) { this.baseUrl = baseUrl; }
 
-    async listarTodos() {
-        const res = await fetch(`${this.baseUrl}/product/`);
-        const data = await res.json();
-        return (data.data || []).map(item => new Product(item));
-    }
+async listarTodos() {
+    const res = await fetch(`${this.baseUrl}/product/`);
+    const data = await res.json();
+    const items = data.data || data || [];
+    return items.map(item => new Product(item));
+}
 
-    async obtener(id) {
-        const res = await fetch(`${this.baseUrl}/product/${id}`);
-        const data = await res.json();
-        return new Product(data.data[0]);
-    }
+ async obtener(id) {
+    const res = await fetch(`${this.baseUrl}/product/${id}`);
+    const data = await res.json();
+    const items = data.data || data || [];
+    if (!items.length) throw new Error("Producto no encontrado");
+    return new Product(items[0]);
+}
 
     async crear(datos, token) {
         const params = new URLSearchParams(datos);
