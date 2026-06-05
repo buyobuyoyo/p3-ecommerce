@@ -6,9 +6,7 @@
 <title>Buyos Movie Lair</title>
 <link rel="stylesheet" href="custom.css">
 <link rel="icon" href="./assets/favicon/favicon.ico" type="image/x-icon">
-<style>
-  body { background-image: none; }
-</style>
+
 </head>
 <body>
 <nav>
@@ -59,6 +57,8 @@
     <div class="form-group"><label>Género *</label><input id="f-genero" placeholder="Acción, Drama, Comedia..."></div>
     <div class="form-group"><label>Precio *</label><input id="f-precio" type="number" step="0.01" placeholder="0.00"></div>
     <div class="form-group"><label>URL de imagen</label><input id="f-imgurl" placeholder="https://..."></div>
+    <input type="file" id="subirImagen" accept="image/*">
+    <img id="vistaPrevia" src="" alt="Vista previa de la imagen" style="display: none; max-width: 300px;">
     <div class="form-group"><label>Duración (min)</label><input id="f-duracion" type="number" placeholder="120"></div>
     <div class="form-group"><label>Año de lanzamiento</label><input id="f-lanzamiento" placeholder="2024"></div>
     <div id="modal-msg"></div>
@@ -183,6 +183,24 @@ document.getElementById('btn-save').addEventListener('click', async () => {
   }
 });
 
+const inputImagen = document.getElementById('subirImagen');
+const vistaPrevia = document.getElementById('vistaPrevia');
+
+inputImagen.addEventListener('change', function(event) {
+  const archivo = event.target.files[0];
+
+  if (archivo) {
+    const lector = new FileReader();
+
+    lector.onload = function(e) {
+      vistaPrevia.src = e.target.result;
+      vistaPrevia.style.display = 'block';
+    }
+    lector.readAsDataURL(archivo);
+  }
+});
+
+
 async function loadOrders() {
   const tbody = document.getElementById('orders-tbody');
   try {
@@ -220,3 +238,8 @@ loadProducts();
 </script>
 </body>
 </html>
+
+<!--
+1. subir imagen directamente del dispositivo 
+2. que el admin pueda chatear directamente con el cliente 
+-->
