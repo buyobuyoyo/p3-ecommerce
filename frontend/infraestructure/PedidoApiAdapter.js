@@ -1,4 +1,4 @@
-import { Pedido } from '../../core/domain/Pedido.js';
+import { Pedido } from './Pedido.js';
 
 export class PedidoApiAdapter {
     constructor(baseUrl) { this.baseUrl = baseUrl; }

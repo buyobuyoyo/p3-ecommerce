@@ -282,16 +282,23 @@
 </div>
 
 <script type="module">
-import { authAdapter } from './infraestructure/api/AuthApiAdapter.js';
-
+  // Importamos las instancias correctas desde la ruta real de app.js
+  import { authAdapter, BACKEND } from './infraestructure/app.js';
+  
   const msg = document.getElementById('msg');
 
+  // EVENTO CLICK DEL BOTÓN GITHUB
   document.getElementById('btn-github').addEventListener('click', async () => {
-    const res = await fetch(`${BACKEND}/auth/login/github`);
-    const data = await res.json();
-    window.location.href = data.url;
+    try {
+      const res = await fetch(`${BACKEND}/auth/login/github`);
+      const data = await res.json();
+      window.location.href = data.url;
+    } catch (error) {
+      msg.textContent = 'Error al conectar con el servidor backend.';
+    }
   });
 
+  // EVENTO CLICK DEL BOTÓN CON TOKEN MANUAL
   document.getElementById('btn-token').addEventListener('click', async () => {
     const token = document.getElementById('token-input').value.trim();
     if (!token) { msg.textContent = 'Pega tu token primero'; return; }
@@ -299,11 +306,14 @@ import { authAdapter } from './infraestructure/api/AuthApiAdapter.js';
     try {
       await authAdapter.getMe(token);
       localStorage.setItem('token', token);
-      // Auto-register en caso de primer login
+      
+      // Auto-registro por si es la primera vez que ingresa el usuario
       try { await authAdapter.register(token); } catch {}
+      
       msg.className = 'ok';
       msg.textContent = '✓ Autenticado. Redirigiendo...';
       setTimeout(() => window.location.href = 'index.html', 800);
+   
     } catch {
       msg.className = '';
       msg.textContent = 'Token inválido o expirado.';

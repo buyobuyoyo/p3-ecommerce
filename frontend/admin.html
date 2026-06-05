@@ -194,7 +194,7 @@
 </div>
 
 <script type="module">
-import { authAdapter, productAdapter, pedidoAdapter, requireAuth, getToken } from '../src/presentation/app.js';
+import { authAdapter, productAdapter, pedidoAdapter, requireAuth, getToken } from './infraestructure/app.js';
 const token = requireAuth();
 if (!token) throw new Error('no auth');
 

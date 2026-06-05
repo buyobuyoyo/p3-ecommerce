@@ -1,7 +1,7 @@
-import { AuthApiAdapter } from '../infrastructure/api/AuthApiAdapter.js';
-import { ProductApiAdapter } from '../infrastructure/api/ProductApiAdapter.js';
-import { PedidoApiAdapter } from '../infrastructure/api/PedidoApiAdapter.js';
-import { ChatAdapter } from '../infrastructure/websocket/ChatAdapter.js';
+import { AuthApiAdapter } from './AuthApiAdapter.js';
+import { ProductApiAdapter } from './ProductApiAdapter.js';
+import { PedidoApiAdapter } from './PedidoApiAdapter.js';
+import { ChatAdapter } from './ChatAdapter.js';
 
 export const BACKEND = 'http://localhost:8000';
 export const WS_BACKEND = 'ws://localhost:8000';

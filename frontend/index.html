@@ -224,7 +224,7 @@
 <button class="chat-fab" onclick="window.location.href='chat.html'" title="Chat">💬</button>
 
 <script type="module">
-import { authAdapter, productAdapter, requireAuth, getToken } from '../src/presentation/app.js';
+import { authAdapter, productAdapter, requireAuth, getToken } from './infraestructure/app.js';
 
 const token = requireAuth();
 if (!token) throw new Error('no auth');

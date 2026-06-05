@@ -80,7 +80,7 @@
 </div>
 
 <script type="module">
-import { pedidoAdapter, productAdapter, requireAuth } from '../src/presentation/app.js';
+import { pedidoAdapter, productAdapter, requireAuth } from './infraestructure/app.js';
 const token = requireAuth();
 if (!token) throw new Error('no auth');
 

@@ -1,4 +1,4 @@
-import { Product } from '../../core/domain/Product.js';
+import { Product } from './Product.js';
 
 export class ProductApiAdapter {
     constructor(baseUrl) { this.baseUrl = baseUrl; }

@@ -116,7 +116,7 @@
 </div>
 
 <script type="module">
-import { chatAdapter, requireAuth, BACKEND } from '../src/presentation/app.js';
+import { chatAdapter, requireAuth, BACKEND } from './infraestructure/app.js';
 const token = requireAuth();
 if (!token) throw new Error('no auth');
 
