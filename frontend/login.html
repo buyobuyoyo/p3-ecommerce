@@ -282,40 +282,76 @@
 </div>
 
 <script type="module">
-  // Importamos las instancias correctas desde la ruta real de app.js
+  // Importamos las instancias configuradas de forma directa
   import { authAdapter, BACKEND } from './infraestructure/app.js';
   
   const msg = document.getElementById('msg');
 
-  // EVENTO CLICK DEL BOTÓN GITHUB
+  // FUNCIÓN: Detectar automáticamente el token al regresar de GitHub
+  async function verificarRetornoOAuth() {
+    if (window.location.hash) {
+      const fragmento = window.location.hash.substring(1);
+      const params = new URLSearchParams(fragmento);
+      const token = params.get('access_token');
+
+      if (token) {
+        try {
+          msg.className = 'ok';
+          msg.style.color = '#4dff91';
+          msg.textContent = '✓ Verificando sesión de GitHub...';
+          
+          // Validamos el token y lo guardamos localmente
+          await authAdapter.getMe(token);
+          localStorage.setItem('token', token);
+          
+          // Auto-registro en la tabla Profile por si es su primera vez en la app
+          try { await authAdapter.register(token); } catch {}
+          
+          msg.textContent = '✓ ¡Inicio de sesión exitoso! Entrando...';
+          
+          // Limpiamos el hash visual de la URL y saltamos al catálogo
+          window.location.hash = '';
+          setTimeout(() => window.location.href = 'index.html', 800);
+          return; 
+        } catch (error) {
+          msg.className = '';
+          msg.style.color = '#ff4d6d';
+          msg.textContent = 'El enlace de inicio de sesión expiró o es inválido.';
+        }
+      }
+    }
+  }
+  
+  // Ejecutar validación inmediatamente al cargar el archivo
+  verificarRetornoOAuth();
+
+  // BOTÓN GITHUB
   document.getElementById('btn-github').addEventListener('click', async () => {
     try {
       const res = await fetch(`${BACKEND}/auth/login/github`);
       const data = await res.json();
       window.location.href = data.url;
     } catch (error) {
+      msg.style.color = '#ff4d6d';
       msg.textContent = 'Error al conectar con el servidor backend.';
     }
   });
 
-  // EVENTO CLICK DEL BOTÓN CON TOKEN MANUAL
   document.getElementById('btn-token').addEventListener('click', async () => {
     const token = document.getElementById('token-input').value.trim();
-    if (!token) { msg.textContent = 'Pega tu token primero'; return; }
+    if (!token) { msg.style.color = '#ff4d6d'; msg.textContent = 'Pega tu token primero'; return; }
 
     try {
       await authAdapter.getMe(token);
       localStorage.setItem('token', token);
-      
-      // Auto-registro por si es la primera vez que ingresa el usuario
       try { await authAdapter.register(token); } catch {}
-      
       msg.className = 'ok';
+      msg.style.color = '#4dff91';
       msg.textContent = '✓ Autenticado. Redirigiendo...';
       setTimeout(() => window.location.href = 'index.html', 800);
-   
     } catch {
       msg.className = '';
+      msg.style.color = '#ff4d6d';
       msg.textContent = 'Token inválido o expirado.';
     }
   });

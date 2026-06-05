@@ -59,36 +59,24 @@ def login_github():
     })
     return {"url": response.url}
 
+from fastapi.responses import RedirectResponse
 
 @router.get("/callback")
-
-def auth_callback():
-    return {"mensaje": "Autenticación exitosa. Copia el access_token del fragmento #hash de la URL."}
-
-# Código viejo que parece no funcionar porque aún no hay front que transforme el token de GitHub en un JWT de Supa.
-
-# def auth_callback(code: str = None, error: str = None):
-    # code: str = None: Es una variable que espera recibir un "código temporal" de GitHub. Es como un vale que luego se canjea por la llave (token) real.
-    # error: str = None: Si algo salió mal en GitHub (por ejemplo, el usuario le dio a "Cancelar"), GitHub enviará el motivo del error aquí.
+def auth_callback(code: str = None):
+    if not code:
+        raise HTTPException(status_code=400, detail="No se recibió el código de autorización")
     
-    # Paso 2 del flujo OAuth 2:
-    # GitHub redirige aquí con un `code`. Supabase lo intercambia por un JWT.
-
-    # Nota: Supabase normalmente maneja este intercambio del lado del cliente
-    # (usando su SDK JS). Si usas un frontend JS, este endpoint no es necesario.
-    # Si el flujo es 100% server-side, aquí es donde procesas el code.
-    
-    # if error:
-    #     raise HTTPException(status_code=400, detail=f"Error OAuth: {error}")
-    
-    # # Revisa si la variable error trae algo. Código 400 (que significa "Petición incorrecta")
-
-    # if not code:
-    #     raise HTTPException(status_code=400, detail="No se recibió código de autorización")
-
-    # # Si no hay error, pero tampoco llegó el code (el vale de GitHub), significa que la comunicación se cortó o es inválida.
-
-    # return {"mensaje": "Callback recibido. El frontend debe completar el intercambio con el SDK de Supabase."}
+    try:
+        # 1. Intercambiamos el código temporal por los tokens de sesión reales de Supabase
+        res = supabase.auth.exchange_code_for_session({"auth_code": code})
+        token_de_acceso = res.session.access_token
+        
+        # 2. Redirigimos automáticamente al navegador de vuelta a tu frontend (puerto 3000)
+        # Pasamos el token limpio en el fragmento #hash de la URL
+        return RedirectResponse(url=f"http://localhost:3000/login.html#access_token={token_de_acceso}")
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al canjear el código de seguridad: {str(e)}")
 
 
 @router.get("/me")
