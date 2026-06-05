@@ -3,8 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chat — CineRenta</title>
+<title>Buyos Movie Lair</title>
 <link rel="stylesheet" href="custom.css">
+<link rel="icon" href="./assets/favicon/favicon.ico" type="image/x-icon">
+<style>
+  body { background-image: none; }
+</style>
 </head>
 <body>
 <nav>
@@ -15,7 +19,7 @@
     <a href="chat.html" class="active">Chat</a>
   </div>
 </nav>
-
+<img class="kuronyuu2" src="./assets/surface10.png">
 <div class="chat-container">
   <div class="chat-header">
     <div class="status-dot" id="status-dot"></div>
@@ -48,7 +52,7 @@ function addMessage(contenido, remitente, timestamp) {
   const div = document.createElement('div');
   div.className = `msg msg-${remitente}`;
   const time = timestamp ? new Date(timestamp).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'}) : '';
-  div.innerHTML = `${contenido}<div class="msg-meta">${remitente === 'asistente' ? '🤖 Asistente' : 'Tú'} ${time}</div>`;
+  div.innerHTML = `${contenido}<div class="msg-meta">${remitente === 'asistente' ? 'Asistente' : 'Tú'} ${time}</div>`;
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
 }
@@ -97,6 +101,21 @@ btnSend.addEventListener('click', enviar);
 input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar(); } });
 
 init();
+</script>
+
+<script>
+  
+  const fabImg = document.querySelector('.kuronyuu2');
+  const ojos = ['./assets/surface10.png', './assets/surface11.png'];
+  let abiertos = true;
+
+  setInterval(() => {
+    fabImg.src = ojos[1]; 
+    setTimeout(() => {
+      fabImg.src = ojos[0]; 
+    }, 3000);
+  }, 3000); 
+
 </script>
 </body>
 </html>

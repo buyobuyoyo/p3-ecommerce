@@ -3,18 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catálogo — CineRenta</title>
+<title>Buyos Movie Lair</title>
 <link rel="stylesheet" href="custom.css">
+<style>
+  body { background-image: none; }
+</style>
+<link rel="icon" href="./assets/favicon/favicon.ico" type="image/x-icon">
 </head>
 <body>
 
 <nav>
-  <a href="index.html" class="nav-logo">CineRenta</a>
+  <a href="index.html" class="nav-logo">Buyos Movie Lair</a>
   <div class="nav-links">
     <a href="index.html" class="active">Catálogo</a>
     <a href="historial.html">Mis Pedidos</a>
     <a href="chat.html">Chat</a>
-  </div>
+    <a href="checkout.html">Carrito <span id="cart-count">0</span></a>
+</div>
   <div class="nav-user">
     Hola, <span id="nav-email">...</span>
     <button class="btn-logout" id="btn-logout">Salir</button>
@@ -22,24 +27,26 @@
 </nav>
 
 <div class="hero">
-  <h1>Renta tu película favorita</h1>
+  <div class="titulotextoindex"><img class="buyosmovielair" src="./assets/title2.gif" alt="title"></div>
 </div>
 
 <div class="filters" id="filters">
-  <button class="filter-btn active" data-genre="todos">Todos</button>
+  <button class="filter-btn active" data-genre="Todos">Todos</button>
 </div>
 
 <div class="catalog" id="catalog">
   <div class="loading">Cargando catálogo...</div>
 </div>
 
-<!-- Botón flotante para ver carrito -->
-<button class="cart-fab" onclick="window.location.href='checkout.html'" title="Ver carrito">
-  🎬 <span class="cart-count" id="cart-count">0</span>
-</button>
 
-<!-- Botón flotante para ir al chat -->
-<button class="chat-fab" onclick="window.location.href='chat.html'" title="Chat">💬</button>
+<a href="chat.html">
+  <div class="mayura-fab">
+    <img src="./assets/surface0.png" alt="Mayura" id="mayura-fab-img">
+    <div class="mayura-dialog" id="mayura-dialog" style="display:none;">
+      ¿Necesitas ayuda para rentar algo?
+    </div>
+  </div>
+</a>
 
 <script type="module">
 import { authAdapter, productAdapter, requireAuth } from './infraestructure/app.js';
@@ -67,17 +74,17 @@ productAdapter.listarTodos().then(products => {
 });
 
 function renderGenres(products) {
-  const genres = ['todos', ...new Set(products.map(p => p.genero).filter(Boolean))];
+  const genres = ['Todos', ...new Set(products.map(p => p.genero).filter(Boolean))];
   const filters = document.getElementById('filters');
   filters.innerHTML = genres.map(g =>
-    `<button class="filter-btn ${g==='todos'?'active':''}" data-genre="${g}">${g}</button>`
+    `<button class="filter-btn ${g==='Todos'?'active':''}" data-genre="${g}">${g}</button>`
   ).join('');
   filters.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       filters.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const genre = btn.dataset.genre;
-      renderProducts(genre === 'todos' ? allProducts : allProducts.filter(p => p.genero === genre));
+      renderProducts(genre === 'Todos' ? allProducts : allProducts.filter(p => p.genero === genre));
     });
   });
 }
@@ -97,7 +104,9 @@ function renderProducts(products) {
       <div class="card-body">
         <div class="card-genre">${p.genero || 'General'}</div>
         <h3 class="card-title">${p.titulo}</h3>
+        <div class="card-desc">${p.descripcion || ''}</div>
         <div class="card-duration">${p.duracion ? p.duracion + ' min' : ''}</div>
+
         <div class="card-footer">
           <span class="card-price">$${Number(p.precio).toFixed(2)}</span>
           <button class="btn-renta" data-id="${p.id}" data-titulo="${p.titulo}" data-precio="${p.precio}" ${!p.disponible ? 'disabled' : ''}>
@@ -123,6 +132,26 @@ function renderProducts(products) {
     });
   });
 }
+</script>
+
+<script>
+  const fabImg = document.getElementById('mayura-fab-img');
+  const ojos = ['./assets/surface0.png', './assets/surface6.png'];
+  let abiertos = true;
+
+  setInterval(() => {
+    // parpadeo rápido
+    fabImg.src = ojos[1]; 
+    setTimeout(() => {
+      fabImg.src = ojos[0]; 
+    }, 150);
+  }, 3000); 
+
+  const fab = document.querySelector('.mayura-fab');
+  const dialog = document.getElementById('mayura-dialog');
+
+  fab.addEventListener('mouseenter', () => dialog.style.display = 'block');
+  fab.addEventListener('mouseleave', () => dialog.style.display = 'none');
 </script>
 </body>
 </html>
