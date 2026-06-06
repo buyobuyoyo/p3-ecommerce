@@ -1,7 +1,7 @@
-# 🎬 Buyos Movie Lair — P3 E-commerce
+# P3 E-commerce (Buyos Movie Lair)
 
 API REST para renta de películas con autenticación OAuth 2 (GitHub via Supabase).  
-**Stack:** FastAPI · Supabase · HTML/CSS/JS Vanilla
+**Stack:** FastAPI Supabase HTML/CSS/JS Vanilla
 
 ---
 
@@ -9,9 +9,9 @@ API REST para renta de películas con autenticación OAuth 2 (GitHub via Supabas
 
 Antes de empezar, asegúrate de tener instalado:
 
-- **Python 3.11+** → https://www.python.org/downloads/
-- **Git** → https://git-scm.com/
-- Un servidor de archivos estáticos para el frontend (se recomienda [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) en VS Code o cualquier alternativa)
+- **Python 3.11+** - https://www.python.org/downloads/
+- **Git** - https://git-scm.com/
+
 
 ---
 
