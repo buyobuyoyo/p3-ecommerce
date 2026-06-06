@@ -59,13 +59,10 @@
     <div class="form-group">
   <label>Imagen</label>
   <input type="file" id="f-imgfile" accept="image/*">
-  <div id="img-preview" style="margin-top:0.5rem;display:none">
-    <img id="img-preview-img" style="width:100%;max-height:120px;object-fit:cover;border-radius:4px;border:1px solid var(--border)">
-  </div>
 </div>
     <img id="vistaPrevia" src="" alt="Vista previa de la imagen" style="display: none; max-width: 300px;">
     <div class="form-group"><label>Duración (min)</label><input id="f-duracion" type="number" placeholder="120"></div>
-    <div class="form-group"><label>Año de lanzamiento</label><input id="f-lanzamiento" placeholder="2024"></div>
+    <div class="form-group"><label>Año de lanzamiento</label><input id="f-lanzamiento" placeholder="2024-01-01"></div>
     <div id="modal-msg"></div>
     <div class="modal-actions">
       <button class="btn-cancel" id="btn-cancel">Cancelar</button>
@@ -124,7 +121,6 @@ async function loadProducts() {
         document.getElementById('f-descripcion').value = btn.dataset.desc;
         document.getElementById('f-genero').value = btn.dataset.genero;
         document.getElementById('f-precio').value = btn.dataset.precio;
-        document.getElementById('f-imgurl').value = btn.dataset.img;
         document.getElementById('f-duracion').value = btn.dataset.dur;
         document.getElementById('f-lanzamiento').value = btn.dataset.lanz;
         document.getElementById('modal-msg').textContent = '';
@@ -149,23 +145,19 @@ async function loadProducts() {
 document.getElementById('btn-new').addEventListener('click', () => {
   editingId = null;
   document.getElementById('modal-title').textContent = 'Nueva Película';
-  ['titulo','descripcion','genero','precio','imgurl','duracion','lanzamiento'].forEach(f => {
+  
+  // Quitamos 'imgurl' del array de campos de texto
+  ['titulo','descripcion','genero','precio','duracion','lanzamiento'].forEach(f => {
     document.getElementById('f-'+f).value = '';
   });
+  
+  // Limpiamos el input de archivo y su vista previa
+  document.getElementById('f-imgfile').value = '';
   document.getElementById('modal-msg').textContent = '';
   document.getElementById('modal').classList.add('open');
 });
 
 document.getElementById('btn-cancel').addEventListener('click', () => document.getElementById('modal').classList.remove('open'));
-
-document.getElementById('f-imgfile').addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const preview = document.getElementById('img-preview');
-  const img = document.getElementById('img-preview-img');
-  img.src = URL.createObjectURL(file);
-  preview.style.display = 'block';
-});
 
 document.getElementById('btn-save').addEventListener('click', async () => {
   const titulo = document.getElementById('f-titulo').value.trim();
@@ -207,23 +199,6 @@ document.getElementById('btn-save').addEventListener('click', async () => {
     setTimeout(() => { document.getElementById('modal').classList.remove('open'); loadProducts(); }, 800);
   } catch {
     msg.className = ''; msg.textContent = 'Error al guardar.';
-  }
-});
-
-const inputImagen = document.getElementById('subirImagen');
-const vistaPrevia = document.getElementById('vistaPrevia');
-
-inputImagen.addEventListener('change', function(event) {
-  const archivo = event.target.files[0];
-
-  if (archivo) {
-    const lector = new FileReader();
-
-    lector.onload = function(e) {
-      vistaPrevia.src = e.target.result;
-      vistaPrevia.style.display = 'block';
-    }
-    lector.readAsDataURL(archivo);
   }
 });
 
