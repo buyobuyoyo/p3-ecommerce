@@ -1,5 +1,5 @@
 # P3 E-commerce (Buyos Movie Lair)
-
+![Logo](frontend/assets/favicon/favicon-32x32.png)
 API REST para renta de películas con autenticación OAuth 2 (GitHub via Supabase).  
 **Stack:** FastAPI Supabase HTML/CSS/JS Vanilla
 
