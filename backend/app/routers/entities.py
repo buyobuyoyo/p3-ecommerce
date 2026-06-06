@@ -1,8 +1,4 @@
-"""
-app/domain/entities.py
-──────────────────────
-Entidades del dominio de chat. No dependen de ninguna tecnología externa.
-"""
+
 
 from dataclasses import dataclass, field
 from datetime import datetime

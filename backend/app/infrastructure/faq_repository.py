@@ -1,12 +1,3 @@
-"""
-app/infrastructure/faq_repository.py
-──────────────────────────────────────
-Adaptador concreto del puerto RespuestaAutomaticaPort.
-Implementación simple por keywords — fácil de reemplazar por IA en el futuro.
-
-Para reemplazar por un LLM: crear una nueva clase que implemente
-RespuestaAutomaticaPort y cambiar el import en chat_service.py. Eso es todo.
-"""
 
 from typing import Optional
 from app.domain.ports import RespuestaAutomaticaPort

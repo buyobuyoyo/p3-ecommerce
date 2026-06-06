@@ -21,9 +21,33 @@
   <div class="tabs">
     <button class="tab active" data-tab="products">Películas</button>
     <button class="tab" data-tab="orders">Pedidos</button>
+<button class="tab" data-tab="chat">Chat Clientes</button>
+
+<div class="tab-content" id="tab-chat">
+  <div style="display:grid; grid-template-columns:260px 1fr; gap:12px; height:70vh;">
+    
+
+    <div style="background:#111; border:2px solid #333; overflow-y:auto;">
+      <div style="background:#000080; padding:6px 10px; font-size:12px; color:#fff;">Conversaciones</div>
+      <div id="conv-list" style="padding:6px;">Cargando...</div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; background:#0a0a0a; border:2px solid #333;">
+      <div style="background:#000080; padding:6px 10px; font-size:12px; color:#fff;" id="conv-title">
+        Selecciona una conversación
+      </div>
+      <div id="admin-messages" style="flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:8px;">
+        <div class="system-msg">Selecciona una conversación de la lista</div>
+      </div>
+      <div style="display:flex; gap:8px; padding:8px; border-top:1px solid #333;">
+        <input id="admin-input" class="chat-input" placeholder="Responder al cliente..." disabled style="flex:1; padding:8px;">
+        <button id="admin-send" class="btn-send" disabled>➤</button>
+      </div>
+    </div>
+  </div>
+</div>
   </div>
 
-  <!-- TAB PELÍCULAS -->
   <div class="tab-content active" id="tab-products">
     <div class="products-header">
       <h2>Catálogo</h2>
@@ -34,7 +58,6 @@
     </div>
   </div>
 
-  <!-- TAB PEDIDOS -->
   <div class="tab-content" id="tab-orders">
     <h2>Pedidos</h2>
     <div class="table-wrap">
@@ -48,7 +71,6 @@
   </div>
 </div>
 
-<!-- MODAL PARA NUEVO/EDITAR -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <h3 id="modal-title">Nueva Película</h3>
@@ -146,12 +168,10 @@ document.getElementById('btn-new').addEventListener('click', () => {
   editingId = null;
   document.getElementById('modal-title').textContent = 'Nueva Película';
   
-  // Quitamos 'imgurl' del array de campos de texto
   ['titulo','descripcion','genero','precio','duracion','lanzamiento'].forEach(f => {
     document.getElementById('f-'+f).value = '';
   });
   
-  // Limpiamos el input de archivo y su vista previa
   document.getElementById('f-imgfile').value = '';
   document.getElementById('modal-msg').textContent = '';
   document.getElementById('modal').classList.add('open');
@@ -203,6 +223,102 @@ document.getElementById('btn-save').addEventListener('click', async () => {
 });
 
 
+let activeConvId = null;
+let adminWs = null;
+
+async function loadConversaciones() {
+  const list = document.getElementById('conv-list');
+  try {
+    const res = await fetch(`${BACKEND}/chat/conversaciones`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error();
+    const convs = await res.json();
+    if (!convs.length) { list.innerHTML = '<div class="system-msg">Sin conversaciones</div>'; return; }
+    list.innerHTML = convs.map(c => `
+      <div class="conv-item" data-id="${c.id}" style="padding:8px; cursor:pointer; border-bottom:1px solid #222; font-size:12px;">
+        <div style="color:#aaa; font-size:10px;">ID: ${c.id.slice(0,8)}...</div>
+        <div style="color:#fff;">Usuario: ${c.user_id.slice(0,8)}...</div>
+        <span class="badge ${c.estado === 'abierta' ? 'badge-activo' : 'badge-devuelto'}">${c.estado}</span>
+      </div>
+    `).join('');
+
+    list.querySelectorAll('.conv-item').forEach(item => {
+      item.addEventListener('click', () => abrirConversacion(item.dataset.id));
+    });
+  } catch {
+    list.innerHTML = '<div class="system-msg">Error al cargar</div>';
+  }
+}
+
+async function abrirConversacion(convId) {
+  activeConvId = convId;
+  document.getElementById('conv-title').textContent = `Conversación: ${convId.slice(0,8)}...`;
+  document.getElementById('admin-input').disabled = false;
+  document.getElementById('admin-send').disabled = false;
+
+  const msgs = document.getElementById('admin-messages');
+  msgs.innerHTML = '<div class="system-msg">Cargando historial...</div>';
+  try {
+    const res = await fetch(`${BACKEND}/chat/conversacion/${convId}/historial`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const historial = await res.json();
+    msgs.innerHTML = '';
+    historial.forEach(m => agregarMensajeAdmin(m.contenido, m.remitente, m.timestamp));
+  } catch {
+    msgs.innerHTML = '<div class="system-msg">Error al cargar historial</div>';
+  }
+
+  if (adminWs) adminWs.close();
+  adminWs = new WebSocket(`${WS_BACKEND}/chat/ws/${convId}`);
+  adminWs.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    if (data.remitente !== 'admin') {
+      agregarMensajeAdmin(data.contenido, data.remitente, data.timestamp);
+    }
+  };
+}
+
+function agregarMensajeAdmin(contenido, remitente, timestamp) {
+  const msgs = document.getElementById('admin-messages');
+  const div = document.createElement('div');
+  const time = timestamp ? new Date(timestamp).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'}) : '';
+  div.className = `msg ${remitente === 'cliente' ? 'msg-asistente' : 'msg-cliente'}`;
+  div.innerHTML = `${contenido}<div class="msg-meta">${remitente === 'cliente' ? 'Cliente' : 'Admin'} ${time}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function enviarRespuestaAdmin() {
+  const input = document.getElementById('admin-input');
+  const texto = input.value.trim();
+  if (!texto || !activeConvId) return;
+  input.value = '';
+
+  try {
+    const res = await fetch(
+      `${BACKEND}/chat/conversacion/${activeConvId}/responder?contenido=${encodeURIComponent(texto)}`,
+      { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } }
+    );
+    if (!res.ok) throw new Error();
+    agregarMensajeAdmin(texto, 'admin', new Date().toISOString());
+  } catch {
+    alert('Error al enviar mensaje');
+  }
+}
+
+document.getElementById('admin-send').addEventListener('click', enviarRespuestaAdmin);
+document.getElementById('admin-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarRespuestaAdmin(); }
+});
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    if (tab.dataset.tab === 'chat') loadConversaciones();
+  });
+});
+
 async function loadOrders() {
   const tbody = document.getElementById('orders-tbody');
   try {
@@ -237,11 +353,9 @@ async function loadOrders() {
 }
 
 loadProducts();
+
+
 </script>
 </body>
 </html>
 
-<!--
-1. subir imagen directamente del dispositivo 
-2. que el admin pueda chatear directamente con el cliente 
--->

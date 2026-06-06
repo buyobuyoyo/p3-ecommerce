@@ -19,7 +19,7 @@ def crear_product(
     imgurl: str = None,
     duracion: int = None,
     lanzamiento: str = None,
-    _user=Depends(require_role("admin"))          #solo admin
+    _user=Depends(require_role("admin"))
 ):
     data = supabase.table("Product").insert({
         "titulo": titulo,
@@ -53,7 +53,7 @@ def actualizar_product(
     precio: float = None,
     disponible: bool = None,
     lanzamiento: str = None,
-    _user=Depends(require_role("admin"))          #solo admin
+    _user=Depends(require_role("admin"))
 ):
     fields = {}
     if titulo is not None: fields["titulo"] = titulo
@@ -69,7 +69,7 @@ def actualizar_product(
 
 
 @router.delete("/{id_product}")
-def eliminar_product(id_product: str, _user=Depends(require_role("admin"))):  #solo admin
+def eliminar_product(id_product: str, _user=Depends(require_role("admin"))):
     data = supabase.table("Product").delete().eq("id_product", id_product).execute()
     return data
 

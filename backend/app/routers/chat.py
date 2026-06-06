@@ -23,7 +23,6 @@ def get_chat_service() -> ChatService:
     )
 
 
-# ── REST endpoints ────────────────────────────────────────────────────────────
 
 @router.post("/conversacion")
 def iniciar_conversacion(
@@ -64,7 +63,6 @@ def obtener_conversaciones(
     return [{"id": c.id, "user_id": c.user_id, "estado": c.estado} for c in convs]
 
 
-# ── WebSocket ─────────────────────────────────────────────────────────────────
 
 @router.websocket("/ws/{conversacion_id}")
 async def websocket_chat(
@@ -83,17 +81,14 @@ async def websocket_chat(
         while True:
             texto = await websocket.receive_text()
 
-            # Procesar mensaje a través del caso de uso
             msg_cliente, msg_asistente = service.procesar_mensaje(conversacion_id, texto)
 
-            # Broadcast del mensaje del cliente a todos en la sala
             await manager.broadcast(conversacion_id, {
                 "remitente": "cliente",
                 "contenido": msg_cliente.contenido,
                 "timestamp": msg_cliente.timestamp.isoformat(),
             })
 
-            # Si hubo respuesta automática, broadcast también
             if msg_asistente:
                 await manager.broadcast(conversacion_id, {
                     "remitente": "asistente",
@@ -103,3 +98,44 @@ async def websocket_chat(
 
     except WebSocketDisconnect:
         manager.desconectar(websocket, conversacion_id)
+
+
+from app.dependencies import get_current_user, require_role
+
+@router.get("/conversaciones")
+def obtener_conversaciones(
+    _user=Depends(require_role("admin")),
+    service: ChatService = Depends(get_chat_service),
+):
+    """Admin obtiene todas las conversaciones."""
+    convs = service.obtener_conversaciones()
+    return [{"id": c.id, "user_id": c.user_id, "estado": c.estado} for c in convs]
+
+
+@router.post("/conversacion/{conversacion_id}/responder")
+async def admin_responder(
+    conversacion_id: str,
+    contenido: str,
+    _user=Depends(require_role("admin")),
+    service: ChatService = Depends(get_chat_service),
+):
+    """Admin envía un mensaje a una conversación."""
+    from datetime import datetime
+    from app.domain.entities import Mensaje
+    from app.infrastructure.chat_repository import SupabaseChatRepository
+
+    repo = SupabaseChatRepository()
+    msg = repo.guardar_mensaje(Mensaje(
+        contenido=contenido,
+        remitente="admin",
+        conversacion_id=conversacion_id,
+        timestamp=datetime.utcnow(),
+    ))
+
+    await manager.broadcast(conversacion_id, {
+        "remitente": "admin",
+        "contenido": msg.contenido,
+        "timestamp": msg.timestamp.isoformat(),
+    })
+
+    return {"ok": True, "mensaje_id": msg.id}

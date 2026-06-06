@@ -7,7 +7,6 @@ security = HTTPBearer()
 
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
-        # En supabase-py 2.x hay que usar get_user() con el token explícito así:
         response = supabase.auth.get_user(jwt=credentials.credentials)
         if not response or not response.user:
             raise HTTPException(status_code=401, detail="Token inválido o expirado")
@@ -32,7 +31,7 @@ def require_role(required_role: str):
         except HTTPException:
             raise
         except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))  # temporal
+            raise HTTPException(status_code=500, detail=str(e))
     return role_checker
 
 

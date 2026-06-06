@@ -37,4 +37,20 @@ export class ChatAdapter {
     desconectar() {
         if (this.socket) this.socket.close();
     }
+
+
+async responderComoAdmin(conversacionId, contenido, token, baseUrl) {
+    const res = await fetch(
+        `${baseUrl}/chat/conversacion/${conversacionId}/responder?contenido=${encodeURIComponent(contenido)}`,
+        {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        }
+    );
+    if (!res.ok) throw new Error("Error al enviar respuesta");
+    return await res.json();
 }
+
+}
+
+

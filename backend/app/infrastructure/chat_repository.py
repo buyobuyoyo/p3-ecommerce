@@ -1,9 +1,4 @@
-"""
-app/infrastructure/chat_repository.py
-───────────────────────────────────────
-Adaptador de persistencia. Implementa ChatRepositoryPort usando Supabase.
-Para cambiar a otra BD: crear nueva clase que implemente ChatRepositoryPort.
-"""
+
 
 import uuid
 from datetime import datetime

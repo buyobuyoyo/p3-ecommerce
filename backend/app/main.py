@@ -9,9 +9,6 @@ app = FastAPI(
     version="2.0.0"
 )
 
-# ── CORS ─────────────────────────────────────────────────────────────────────
-# Necesario para que el frontend (React/Next/Vue) pueda llamar la API.
-# En producción reemplaza "*" con el dominio real del frontend.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],          
@@ -20,7 +17,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Routers ───────────────────────────────────────────────────────────────────
 app.include_router(auth.router,    prefix="/auth",    tags=["Auth"])
 app.include_router(profile.router, prefix="/profile", tags=["Profile"])
 app.include_router(product.router, prefix="/product", tags=["Product"])
