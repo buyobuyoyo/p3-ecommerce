@@ -1,7 +1,20 @@
-# 🎬 Buyos Movie Lair — P3 E-commerce
+# P3 E-commerce (Buyos Movie Lair)
 
 API REST para renta de películas con autenticación OAuth 2 (GitHub via Supabase).  
-**Stack:** FastAPI · Supabase · HTML/CSS/JS Vanilla
+**Stack:** FastAPI Supabase HTML/CSS/JS Vanilla
+
+## Tabla de contenidos
+
+- [Requisitos previos](#requisitos-previos)
+- [1. Clonar el repositorio](#1-clonar-el-repositorio)
+- [2. Crear y activar el entorno virtual](#2-crear-y-activar-el-entorno-virtual)
+- [3. Instalar dependencias del backend](#3-instalar-dependencias-del-backend)
+- [4. Levantar el servidor backend](#4-levantar-el-servidor-backend)
+- [5. Levantar el frontend](#5-levantar-el-frontend)
+- [6. Flujo de autenticación (GitHub OAuth)](#6-flujo-de-autenticación-github-oauth)
+- [Estructura del proyecto](#estructura-del-proyecto)
+- [Dependencias del backend (detalle)](#dependencias-del-backend-detalle)
+- [Notas](#notas)
 
 ---
 
@@ -9,11 +22,8 @@ API REST para renta de películas con autenticación OAuth 2 (GitHub via Supabas
 
 Antes de empezar, asegúrate de tener instalado:
 
-- **Python 3.11+** → https://www.python.org/downloads/
-- **Git** → https://git-scm.com/
-- Un servidor de archivos estáticos para el frontend (se recomienda [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) en VS Code o cualquier alternativa)
-
----
+- **Python 3.11+** - https://www.python.org/downloads/
+- **Git** - https://git-scm.com/
 
 ## 1. Clonar el repositorio
 
@@ -22,9 +32,9 @@ git clone <URL_DEL_REPO>
 cd <nombre-de-la-carpeta>
 ```
 
----
-
 ## 2. Crear y activar el entorno virtual
+
+Es posible tener que usar ```bash Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass```.
 
 **Windows:**
 ```bash
@@ -40,8 +50,6 @@ source .venv/bin/activate
 
 > Sabrás que está activo porque el prompt cambia a `(.venv)`.
 
----
-
 ## 3. Instalar dependencias del backend
 
 Desde la raíz del proyecto, crea un archivo `requirements.txt` con el siguiente contenido:
@@ -49,8 +57,15 @@ Desde la raíz del proyecto, crea un archivo `requirements.txt` con el siguiente
 ```
 fastapi
 uvicorn[standard]
-supabase==2.3.0
-gotrue==1.3.0
+supabase>=2.7.0
+gotrue>=2.0.0
+postgrest>=0.16.0
+storage3>=0.8.0
+supafunc>=0.4.0
+websockets>=13.0
+python-multipart
+httpcore>=1.0.0
+httpx>=0.27.0
 ```
 
 Si el archivo `ya existe` omite este paso.
@@ -60,8 +75,6 @@ Luego instala:
 ```bash
 pip install -r requirements.txt
 ```
-
----
 
 ## 4. Levantar el servidor backend
 
@@ -78,8 +91,6 @@ Para explorar y probar todos los endpoints de la API, abre en tu navegador:
 http://localhost:8000/docs
 ```
 
----
-
 ## 5. Levantar el frontend
 
 El frontend es HTML/JS puro y necesita ser servido desde un servidor local (no se puede abrir directamente como archivo con `file://` porque usa módulos ES y fetch).
@@ -92,9 +103,7 @@ python -m http.server 3000
 
 Luego abre: **http://localhost:3000**
 
-> ⚠️ El frontend **debe** correr en el puerto `3000` porque el backend redirige el callback de OAuth a `http://localhost:3000/login.html`.
-
----
+> El frontend **debe** correr en el puerto `3000` porque el backend redirige el callback de OAuth a `http://localhost:3000/login.html`.
 
 ## 6. Flujo de autenticación (GitHub OAuth)
 
@@ -103,8 +112,6 @@ Luego abre: **http://localhost:3000**
 3. Autoriza la app en GitHub.
 4. Serás redirigido de vuelta al frontend con el token en la URL.
 5. El sistema guarda el token automáticamente y te lleva al catálogo.
-
----
 
 ## Estructura del proyecto
 
@@ -139,8 +146,6 @@ Luego abre: **http://localhost:3000**
 | `uvicorn[standard]` | latest | Servidor ASGI para correr FastAPI |
 | `supabase` | 2.3.0 | Cliente para conectarse a la base de datos y autenticación |
 | `gotrue` | 1.3.0 | Manejo de tokens y sesiones OAuth (requerido por supabase-py) |
-
----
 
 ## Notas
 
