@@ -34,6 +34,8 @@ cd <nombre-de-la-carpeta>
 
 ## 2. Crear y activar el entorno virtual
 
+Es posible tener que usar ```bash Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass```
+
 **Windows:**
 ```bash
 python -m venv .venv
@@ -55,8 +57,15 @@ Desde la raíz del proyecto, crea un archivo `requirements.txt` con el siguiente
 ```
 fastapi
 uvicorn[standard]
-supabase==2.3.0
-gotrue==1.3.0
+supabase>=2.7.0
+gotrue>=2.0.0
+postgrest>=0.16.0
+storage3>=0.8.0
+supafunc>=0.4.0
+websockets>=13.0
+python-multipart
+httpcore>=1.0.0
+httpx>=0.27.0
 ```
 
 Si el archivo `ya existe` omite este paso.
