@@ -34,7 +34,10 @@ cd <nombre-de-la-carpeta>
 
 ## 2. Crear y activar el entorno virtual
 
-Es posible tener que usar ```bash Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass```.
+Es posible tener que usar:
+```bash 
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+```
 
 **Windows:**
 ```bash
